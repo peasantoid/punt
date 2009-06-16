@@ -15,38 +15,7 @@
  * along with punt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <sys/stat.h>
-
-/* identifies the type of an item */
-typedef enum {
-  P_NUM,
-  P_STR,
-  P_UDEF /* user-defined */
-} p_type;
-
-/*
- * serves as: token, piece of data, variable
- */
-typedef struct {
-  p_type type;
-
-  char *name;
-  void *value;
-
-  struct p_atom *next;
-} p_atom;
-
-/* atom.c */
+#include "common.h"
 
 
-/* tokenizer.c */
-p_atom *tokenize_fp(const FILE *);
-p_atom *tokenize_str(const char *);
-
-/* engine.c */
-p_atom *run_tokens(p_atom *, p_atom *);
 
