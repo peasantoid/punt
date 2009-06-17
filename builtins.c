@@ -21,7 +21,7 @@
 p_atom *register_builtins(void) {
   p_atom *vars = NULL;
 
-  atom_setname(&vars, make_atom(P_MFUNC, "func", &blt_func));
+  atom_setname(&vars, make_atom(P_MFUNC, "func", &blt_func);
   atom_setname(&vars, make_atom(P_MFUNC, "cond", &blt_cond));
   atom_setname(&vars, make_atom(P_MFUNC, "yes", &blt_func));
   atom_setname(&vars, make_atom(P_MFUNC, "no", &blt_cond));
