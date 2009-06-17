@@ -20,14 +20,15 @@
 int main(const int argc, const char **argv) {
   static unsigned int i;
   static FILE *fp;
-  p_atom *tokens = NULL,
-         *vars =   NULL;
   static struct stat finfo;
+  p_atom *vars = NULL;
+
+  atom_setname(&vars, make_atom(P_MFUNC, "func", &blt_func));
 
   for(i = 1; i < argc; i++) {
     /*
      * check for directory: code contributed by vkumar
-     * for some reason, we're allowed to fopen directories
+     * for some reason, we're allowed to fopen() directories
      */
     if(lstat(argv[i], &finfo) == -1 || S_ISDIR(finfo.st_mode)) {
       if(S_ISDIR(finfo.st_mode)) {
@@ -44,12 +45,9 @@ int main(const int argc, const char **argv) {
       return 1;
     }
 
-    tokens = tokenize_fp(fp);
-    run_tokens(tokens, vars);
-
+    run_code(parse_tokens(tokenize_fp(fp)), &vars);
     fclose(fp);
   }
-  printf(MOD_DIR "\n");
 
   return 0;
 }
