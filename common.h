@@ -35,6 +35,7 @@ typedef enum {
   P_LIST,
   P_MFUNC,
   P_FUNC,
+  P_UDEF, /* user-defined */
 
   /* token types */
   PT_PARENL,
@@ -44,9 +45,15 @@ typedef enum {
   PT_EXP
 } p_type;
 
+typedef struct {
+
+} p_udef;
+
 /* serves as just about everything */
 typedef struct {
   p_type type;
+  char *utype; /* name of user-defined type */
+
   char *name;
   void *value;
 
@@ -75,7 +82,7 @@ p_atom *tokenize_str(const char *);
 p_atom *parse_tokens(p_atom *);
 void run_code(p_atom *, p_atom **);
 p_atom *run_exp(p_atom *, p_atom **);
-void check_args(const char *, const int, p_atom *);
+void check_argc(const char *, const int, p_atom *);
 
 /* string.c */
 char *vafmt(const char *, ...);

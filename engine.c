@@ -96,11 +96,14 @@ void run_code(p_atom *code, p_atom **vars) {
 }
 
 p_atom *run_exp(p_atom *exp, p_atom **vars) {
-  p_atom *rval = NULL, *_args, *args = NULL, *atom, *func;
+  p_atom *rval = NULL, *_args, *args = NULL, *atom, *func, *funcvars, *orig;
   p_atom *(*funcptr)(p_atom *, p_atom **) = NULL;
   
   switch(exp->type) {
-    case PT_EXP: break;
+    /* we can run it */
+    case PT_EXP:
+      break;
+    /* we can't run it, so return it */
     default:
       return exp;
       break;
@@ -143,6 +146,22 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
       }
       atom_setname(vars, make_atom(args->type, (char *)func->value, args->value));
       break;
+    case P_FUNC:
+      funcvars = NULL;
+      orig = *vars;
+      while(*vars) {
+        if((*vars)->type == P_FUNC || (*vars)->type == P_MFUNC) {
+          atom_append(&funcvars, make_atom((*vars)->type, (*vars)->name, (*vars)->value));
+        }
+        *vars = (p_atom *)(*vars)->next;
+      }
+      *vars = orig;
+      /*
+       * convert the func to an exp so the engine will know to run it
+       * rather than return its value
+       */
+      rval = run_exp(make_atom(PT_EXP, "", func->value), &funcvars);
+      break;
     case P_MFUNC:
       funcptr = func->value;
       rval = (*funcptr)(args, vars);
@@ -156,12 +175,12 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
   return rval;
 }
 
-void check_args(const char *func, const int minlen, p_atom *args) {
+void check_argc(const char *func, const int minlen, p_atom *args) {
   /* must be exact */
-  if(minlen < 0) {
+  if(minlen <= 0) {
     if(atom_len(args) != abs(minlen)) {
-      fprintf(stderr , "%s: exactly %d %s required, %d given\n", func, minlen,
-          minlen == -1 ? "arg" : "args", minlen);
+      fprintf(stderr , "%s: exactly %d %s required, %d given\n", func, abs(minlen),
+          minlen == -1 ? "arg" : "args", atom_len(args));
       exit(1);
     }
   } else {
