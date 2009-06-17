@@ -21,9 +21,7 @@ int main(const int argc, const char **argv) {
   static unsigned int i;
   static FILE *fp;
   static struct stat finfo;
-  p_atom *vars = NULL;
-
-  atom_setname(&vars, make_atom(P_MFUNC, "func", &blt_func));
+  p_atom *vars = register_builtins();
 
   for(i = 1; i < argc; i++) {
     /*

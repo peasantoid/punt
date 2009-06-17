@@ -16,19 +16,17 @@
  */
 
 #include "common.h"
+#include "blt/flow.c"
 
-/* create a function */
-p_atom *blt_func(p_atom *args, p_atom **vars) {
-  p_atom *rval = make_atom(P_FUNC, "", NULL);
+p_atom *register_builtins(void) {
+  p_atom *vars = NULL;
 
-  check_argc("func", -1, args);
-  if(args->type != P_BLOCK) {
-    fprintf(stderr, "func: body must be a quoted exp\n");
-    exit(1);
-  }
-  rval->value = args->value;
+  atom_setname(&vars, make_atom(P_MFUNC, "func", &blt_func));
+  atom_setname(&vars, make_atom(P_MFUNC, "cond", &blt_cond));
+  atom_setname(&vars, make_atom(P_MFUNC, "yes", &blt_func));
+  atom_setname(&vars, make_atom(P_MFUNC, "no", &blt_cond));
 
-  return rval;
+  return vars;
 }
 
 /* return true */

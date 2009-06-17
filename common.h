@@ -90,7 +90,9 @@ int str_pos(const char *, const char *, unsigned int);
 char *str_replace(const char *, const char *, const char *, unsigned int);
 
 /* builtins.c */
+p_atom *register_builtins(void);
 p_atom *blt_func(p_atom *, p_atom **);
+p_atom *blt_cond(p_atom *, p_atom **);
 p_atom *blt_yes(p_atom *, p_atom **);
 p_atom *blt_no(p_atom *, p_atom **);
 

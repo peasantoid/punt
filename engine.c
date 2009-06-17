@@ -96,7 +96,8 @@ void run_code(p_atom *code, p_atom **vars) {
 }
 
 p_atom *run_exp(p_atom *exp, p_atom **vars) {
-  p_atom *rval = NULL, *_args, *args = NULL, *atom, *func, *funcvars, *orig;
+  p_atom *rval = NULL, *_args, *args = NULL, *atom, *func,
+         *funcvars, *orig;
   p_atom *(*funcptr)(p_atom *, p_atom **) = NULL;
   
   switch(exp->type) {
@@ -148,14 +149,21 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
       break;
     case P_FUNC:
       funcvars = NULL;
+      /* only pass down functions */
       orig = *vars;
       while(*vars) {
         if((*vars)->type == P_FUNC || (*vars)->type == P_MFUNC) {
-          atom_append(&funcvars, make_atom((*vars)->type, (*vars)->name, (*vars)->value));
+          /* using make_atom() so we don't bring the rest of the scope along as well */
+          atom_setname(&funcvars, make_atom((*vars)->type, (*vars)->name, (*vars)->value));
         }
         *vars = (p_atom *)(*vars)->next;
       }
       *vars = orig;
+
+      /* set some special variables */
+      atom_setname(&funcvars, make_atom(P_FUNC, "__func", func));
+      atom_setname(&funcvars, make_atom(P_NUM, "__argc", atom_dupnum(atom_len(args))));
+
       /*
        * convert the func to an exp so the engine will know to run it
        * rather than return its value
