@@ -73,6 +73,7 @@ p_atom *atom_getname(p_atom *, const char *);
 p_atom *atom_dup(p_atom *);
 void atom_setname(p_atom **, p_atom *);
 int atom_true(p_atom *);
+#define NIL_ATOM make_atom(P_NIL, "", NULL);
 
 /* tokenizer.c */
 p_atom *tokenize_fp(FILE *);
@@ -95,4 +96,6 @@ p_atom *blt_func(p_atom *, p_atom **);
 p_atom *blt_cond(p_atom *, p_atom **);
 p_atom *blt_yes(p_atom *, p_atom **);
 p_atom *blt_no(p_atom *, p_atom **);
+p_atom *blt_fmt(p_atom *, p_atom **);
+p_atom *blt_prt(p_atom *, p_atom **);
 

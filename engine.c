@@ -148,6 +148,7 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
       atom_setname(vars, make_atom(args->type, (char *)func->value, args->value));
       break;
     case P_FUNC:
+    case P_MFUNC:
       funcvars = NULL;
       /* only pass down functions */
       orig = *vars;
@@ -164,15 +165,16 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
       atom_setname(&funcvars, make_atom(P_FUNC, "__func", func));
       atom_setname(&funcvars, make_atom(P_NUM, "__argc", atom_dupnum(atom_len(args))));
 
-      /*
-       * convert the func to an exp so the engine will know to run it
-       * rather than return its value
-       */
-      rval = run_exp(make_atom(PT_EXP, "", func->value), &funcvars);
-      break;
-    case P_MFUNC:
-      funcptr = func->value;
-      rval = (*funcptr)(args, vars);
+      if(func->type == P_FUNC) {
+        /*
+         * convert the func to an exp so the engine will know to run it
+         * rather than return its value
+         */
+        rval = run_exp(make_atom(PT_EXP, "", func->value), &funcvars);
+      } else if(func->type == P_MFUNC) {
+        funcptr = func->value;
+        rval = (*funcptr)(args, &funcvars);
+      }
       break;
     default:
       fprintf(stderr, "type not callable\n");
@@ -193,7 +195,7 @@ void check_argc(const char *func, const int minlen, p_atom *args) {
     }
   } else {
     if(atom_len(args) < minlen) {
-      fprintf(stderr, "%s: at least %d %s required %d given\n", func, minlen,
+      fprintf(stderr, "%s: at least %d %s required, %d given\n", func, minlen,
           minlen == 1 ? "arg" : "args", minlen);
       exit(1);
     }

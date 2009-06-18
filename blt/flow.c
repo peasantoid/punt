@@ -46,6 +46,6 @@ p_atom *blt_cond(p_atom *args, p_atom **vars) {
 
     args = (p_atom *)args->next;
   }
-  return make_atom(P_NIL, "", NULL);
+  return NIL_ATOM;
 }
 
