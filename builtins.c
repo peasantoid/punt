@@ -23,8 +23,8 @@ p_atom *register_builtins(void) {
 
   atom_setname(&vars, make_atom(P_MFUNC, "func", &blt_func));
   atom_setname(&vars, make_atom(P_MFUNC, "cond", &blt_cond));
-  atom_setname(&vars, make_atom(P_MFUNC, "yes", &blt_func));
-  atom_setname(&vars, make_atom(P_MFUNC, "no", &blt_cond));
+  atom_setname(&vars, make_atom(P_MFUNC, "yes", &blt_yes));
+  atom_setname(&vars, make_atom(P_MFUNC, "no", &blt_no));
   atom_setname(&vars, make_atom(P_MFUNC, "fmt", &blt_fmt));
   atom_setname(&vars, make_atom(P_MFUNC, "prt", &blt_prt));
 
