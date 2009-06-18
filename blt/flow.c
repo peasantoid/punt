@@ -49,3 +49,10 @@ p_atom *blt_cond(p_atom *args, p_atom **vars) {
   return NIL_ATOM;
 }
 
+/* returns value of last argument */
+p_atom *blt_last(p_atom *args, p_atom **vars) {
+  p_atom *atom = atom_tail(args);
+  if(!atom) { return NIL_ATOM; }
+  return atom;
+}
+

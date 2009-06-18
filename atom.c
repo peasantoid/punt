@@ -45,6 +45,7 @@ unsigned int atom_len(p_atom *atom) {
 
 /* return tail end of a linked list of atoms */
 p_atom *atom_tail(p_atom *atom) {
+  if(!atom) { return NULL; }
   while(atom->next) {
     /*
      * FIXME: w/o cast, gcc throws 'assignment from incompatible pointer type'

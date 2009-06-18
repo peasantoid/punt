@@ -23,6 +23,7 @@ p_atom *register_builtins(void) {
 
   atom_setname(&vars, make_atom(P_MFUNC, "func", &blt_func));
   atom_setname(&vars, make_atom(P_MFUNC, "cond", &blt_cond));
+  atom_setname(&vars, make_atom(P_MFUNC, "last", &blt_last));
   atom_setname(&vars, make_atom(P_MFUNC, "yes", &blt_yes));
   atom_setname(&vars, make_atom(P_MFUNC, "no", &blt_no));
   atom_setname(&vars, make_atom(P_MFUNC, "fmt", &blt_fmt));
@@ -52,6 +53,8 @@ p_atom *blt_fmt(p_atom *args, p_atom **vars) {
       asprintf(&rval, "%s%f", rval, *(p_num *)args->value);
     } else if(args->type == P_STR) {
       asprintf(&rval, "%s%s", rval, (char *)args->value);
+    } else {
+      asprintf(&rval, "%s?", rval);
     }
     args = (p_atom *)args->next;
   }

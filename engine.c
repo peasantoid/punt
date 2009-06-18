@@ -95,16 +95,30 @@ void run_code(p_atom *code, p_atom **vars) {
   }
 }
 
+p_atom *resolve_symbol(p_atom *vars, const char *sym) {
+  p_atom *atom = atom_getname(vars, sym);
+  if(!atom) {
+    fprintf(stderr, "%s: undefined symbol\n", sym);
+    exit(1);
+  }
+  return atom;
+}
+
 p_atom *run_exp(p_atom *exp, p_atom **vars) {
   p_atom *rval = NULL, *_args, *args = NULL, *atom, *func,
          *funcvars, *orig;
   p_atom *(*funcptr)(p_atom *, p_atom **) = NULL;
+  int i;
   
   switch(exp->type) {
     /* we can run it */
     case PT_EXP:
       break;
-    /* we can't run it, so return it */
+    /* we can resolve it */
+    case P_SYM:
+      return resolve_symbol(*vars, (char *)exp->value);
+      break;
+    /* we can't run or resolve it, so return it */
     default:
       return exp;
       break;
@@ -117,11 +131,7 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
         atom_append(&args, run_exp(_args, vars));
         break;
       case P_SYM:
-        atom = atom_getname(*vars, (char *)_args->value);
-        if(!atom) {
-          fprintf(stderr, "%s: undefined symbol\n", (char *)_args->value);
-          exit(1);
-        }
+        atom = resolve_symbol(*vars, (char *)_args->value);
         atom_append(&args, make_atom(atom->type, "", atom->value));
         break;
       case PT_LITSYM:
@@ -148,7 +158,6 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
       atom_setname(vars, make_atom(args->type, (char *)func->value, args->value));
       break;
     case P_FUNC:
-    case P_MFUNC:
       funcvars = NULL;
       /* only pass down functions */
       orig = *vars;
@@ -164,17 +173,26 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
       /* set some special variables */
       atom_setname(&funcvars, make_atom(P_FUNC, "__func", func));
       atom_setname(&funcvars, make_atom(P_NUM, "__argc", atom_dupnum(atom_len(args))));
-
-      if(func->type == P_FUNC) {
-        /*
-         * convert the func to an exp so the engine will know to run it
-         * rather than return its value
-         */
-        rval = run_exp(make_atom(PT_EXP, "", func->value), &funcvars);
-      } else if(func->type == P_MFUNC) {
-        funcptr = func->value;
-        rval = (*funcptr)(args, &funcvars);
+      
+      /* arguments referring to variables */
+      i = 1;
+      orig = args;
+      while(args) {
+        atom_setname(&funcvars, make_atom(args->type, vafmt("_%d", i), args->value));
+        args = (p_atom *)args->next;
+        i++;
       }
+      args = orig;
+
+      /*
+       * convert the func to an exp so the engine will know to run it
+       * rather than return its value
+       */
+      rval = run_exp(make_atom(PT_EXP, "", func->value), &funcvars);
+      break;
+    case P_MFUNC:
+      funcptr = func->value;
+      rval = (*funcptr)(args, vars);
       break;
     default:
       fprintf(stderr, "type not callable\n");

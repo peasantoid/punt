@@ -52,7 +52,6 @@ typedef struct {
 /* serves as just about everything */
 typedef struct {
   p_type type;
-  char *utype; /* name of user-defined type */
 
   char *name;
   void *value;
@@ -84,6 +83,7 @@ p_atom *parse_tokens(p_atom *);
 void run_code(p_atom *, p_atom **);
 p_atom *run_exp(p_atom *, p_atom **);
 void check_argc(const char *, const int, p_atom *);
+p_atom *resolve_symbol(p_atom *, const char *);
 
 /* string.c */
 char *vafmt(const char *, ...);
