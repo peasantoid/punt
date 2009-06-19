@@ -27,6 +27,7 @@ char **_punt_report_funcs(void) {
 }
 
 p_atom *punt_add(p_atom *args, p_atom **vars) {
+  load_module("foo", vars);
   check_argc("add", 2, args);
   if(args->type != P_NUM || atom_getindex(args, 1)->type != P_NUM) {
     fprintf(stderr, "add: arguments must be numbers\n");
