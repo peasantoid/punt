@@ -20,9 +20,6 @@
 p_atom *register_builtins(void) {
   p_atom *vars = NULL;
 
-  atom_setname(&vars, make_atom(P_MFUNC, "use", &blt_use));
-  atom_setname(&vars, make_atom(P_MFUNC, "load", &blt_load));
-  
   atom_setname(&vars, make_atom(P_MFUNC, "func", &blt_func));
   atom_setname(&vars, make_atom(P_MFUNC, "cond", &blt_cond));
   atom_setname(&vars, make_atom(P_MFUNC, "last", &blt_last));
@@ -32,12 +29,12 @@ p_atom *register_builtins(void) {
   atom_setname(&vars, make_atom(P_MFUNC, "fmt", &blt_fmt));
   atom_setname(&vars, make_atom(P_MFUNC, "prt", &blt_prt));
   atom_setname(&vars, make_atom(P_MFUNC, "typenum", &blt_typenum));
+  atom_setname(&vars, make_atom(P_MFUNC, "use", &blt_use));
 
   return vars;
 }
 
 #include "blt/flow.c"
-#include "blt/module.c"
 
 /* return true */
 p_atom *blt_yes(p_atom *args, p_atom **vars) {
@@ -87,5 +84,26 @@ p_atom *blt_prt(p_atom *args, p_atom **vars) {
 p_atom *blt_typenum(p_atom *args, p_atom **vars) {
   check_argc("typenum", 1, args);
   return make_atom(P_NUM, "", atom_dupnum(args->type));
+}
+
+p_atom *blt_use(p_atom *args, p_atom **vars) {
+  char *path;
+
+  while(args) {
+    if(args->type != P_STR) {
+      fprintf(stderr, "use: all arguments must be strings\n");
+      exit(1);
+    }
+
+    asprintf(&path, "%s/%s.so", MOD_DIR, basename((char *)args->value));
+    if(!load_module(path, vars)) {
+      fprintf(stderr, "use: %s\n", dlerror());
+      exit(1);
+    }
+
+    args = (p_atom *)args->next;
+  }
+
+  return NIL_ATOM;
 }
 

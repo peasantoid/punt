@@ -106,5 +106,4 @@ p_atom *blt_typenum(p_atom *, p_atom **);
   p_atom *blt_last(p_atom *, p_atom **);
   /* module.c */
   p_atom *blt_use(p_atom *, p_atom **);
-  p_atom *blt_load(p_atom *, p_atom **);
 
