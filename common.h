@@ -23,6 +23,8 @@
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <dlfcn.h>
+#include <libgen.h>
 
 /* identifies the type of an item */
 typedef enum {
@@ -84,6 +86,7 @@ void run_code(p_atom *, p_atom **);
 p_atom *run_exp(p_atom *, p_atom **);
 void check_argc(const char *, const int, p_atom *);
 p_atom *resolve_symbol(p_atom *, const char *);
+int load_module(const char *, p_atom **);
 
 /* string.c */
 char *vafmt(const char *, ...);
@@ -92,10 +95,16 @@ char *str_replace(const char *, const char *, const char *, unsigned int);
 
 /* builtins.c */
 p_atom *register_builtins(void);
-p_atom *blt_func(p_atom *, p_atom **);
-p_atom *blt_cond(p_atom *, p_atom **);
 p_atom *blt_yes(p_atom *, p_atom **);
 p_atom *blt_no(p_atom *, p_atom **);
 p_atom *blt_fmt(p_atom *, p_atom **);
 p_atom *blt_prt(p_atom *, p_atom **);
+p_atom *blt_typenum(p_atom *, p_atom **);
+  /* flow.c */
+  p_atom *blt_func(p_atom *, p_atom **);
+  p_atom *blt_cond(p_atom *, p_atom **);
+  p_atom *blt_last(p_atom *, p_atom **);
+  /* module.c */
+  p_atom *blt_use(p_atom *, p_atom **);
+  p_atom *blt_load(p_atom *, p_atom **);
 

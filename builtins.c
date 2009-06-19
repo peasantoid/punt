@@ -16,21 +16,28 @@
  */
 
 #include "common.h"
-#include "blt/flow.c"
 
 p_atom *register_builtins(void) {
   p_atom *vars = NULL;
 
+  atom_setname(&vars, make_atom(P_MFUNC, "use", &blt_use));
+  atom_setname(&vars, make_atom(P_MFUNC, "load", &blt_load));
+  
   atom_setname(&vars, make_atom(P_MFUNC, "func", &blt_func));
   atom_setname(&vars, make_atom(P_MFUNC, "cond", &blt_cond));
   atom_setname(&vars, make_atom(P_MFUNC, "last", &blt_last));
+
   atom_setname(&vars, make_atom(P_MFUNC, "yes", &blt_yes));
   atom_setname(&vars, make_atom(P_MFUNC, "no", &blt_no));
   atom_setname(&vars, make_atom(P_MFUNC, "fmt", &blt_fmt));
   atom_setname(&vars, make_atom(P_MFUNC, "prt", &blt_prt));
+  atom_setname(&vars, make_atom(P_MFUNC, "typenum", &blt_typenum));
 
   return vars;
 }
+
+#include "blt/flow.c"
+#include "blt/module.c"
 
 /* return true */
 p_atom *blt_yes(p_atom *args, p_atom **vars) {
@@ -64,14 +71,21 @@ p_atom *blt_fmt(p_atom *args, p_atom **vars) {
 
 /* print a string */
 p_atom *blt_prt(p_atom *args, p_atom **vars) {
-  check_argc("prt", -1, args);
+  check_argc("prt", 1, args);
   if(args->type != P_STR) {
     fprintf(stderr, "prt: string required\n");
     exit(1);
   }
   
   printf("%s", (char *)args->value);
+  fflush(stdout);
 
   return NIL_ATOM;
+}
+
+/* return type number */
+p_atom *blt_typenum(p_atom *args, p_atom **vars) {
+  check_argc("typenum", 1, args);
+  return make_atom(P_NUM, "", atom_dupnum(args->type));
 }
 

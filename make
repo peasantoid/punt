@@ -4,27 +4,40 @@ BIN_DIR="/usr/local/bin"
 MOD_DIR="/usr/local/lib/punt"
 
 make_punt() {
-  gccflags="-Wall -D MOD_DIR=\"$MOD_DIR\""
+  echo 'Building interpreter...'
+
+  gccflags="-Wall -D MOD_DIR=\"$MOD_DIR\" -fPIC"
   
-  echo 'main' &&
+  echo '  main' &&
   gcc -c main.c -o build/punt/obj/main.o $gccflags &&
 
-  echo 'atom' &&
+  echo '  atom' &&
   gcc -c atom.c -o build/punt/obj/atom.o $gccflags &&
 
-  echo 'tokenizer' &&
+  echo '  tokenizer' &&
   gcc -c tokenizer.c -o build/punt/obj/tokenizer.o $gccflags &&
 
-  echo 'engine' &&
+  echo '  engine' &&
   gcc -c engine.c -o build/punt/obj/engine.o $gccflags &&
 
-  echo 'string' &&
+  echo '  string' &&
   gcc -c string.c -o build/punt/obj/string.o $gccflags &&
 
-  echo 'builtins' &&
+  echo '  builtins' &&
   gcc -c builtins.c -o build/punt/obj/builtins.o $gccflags &&
 
-  gcc build/punt/obj/*.o -o build/punt/punt
+  gcc build/punt/obj/*.o -o build/punt/punt \
+    -l dl
+}
+
+make_modules() {
+  echo 'Building modules...'
+
+  for mod in modules/*; do
+    echo -n '  '; basename "$mod"
+    gcc "$mod/"*.c build/punt/obj/*.o -o "build/$mod.so" \
+      -fPIC -shared
+  done
 }
 
 make_clean() {
@@ -32,11 +45,14 @@ make_clean() {
 }
 
 make_install() {
+  mkdir -p "$BIN_DIR" &&
+  mkdir -p "$MOD_DIR" &&
+
   cp build/punt/punt "$BIN_DIR" &&
   cp build/modules/*.so "$MOD_DIR"
 }
 
-mkdir -p build/{,punt/{,obj},modules/{,obj}}
+mkdir -p build/{,punt/{,obj},modules/}
 case "$1" in
   clean)
     make_clean
@@ -44,8 +60,15 @@ case "$1" in
   install)
     make_install
     ;;
-  *)
+  punt)
     make_punt
+    ;;
+  modules)
+    make_modules
+    ;;
+  *)
+    make_punt &&
+    make_modules
     ;;
 esac
 

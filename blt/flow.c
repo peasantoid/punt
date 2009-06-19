@@ -19,7 +19,7 @@
 p_atom *blt_func(p_atom *args, p_atom **vars) {
   p_atom *rval = make_atom(P_FUNC, "", NULL);
 
-  check_argc("func", -1, args);
+  check_argc("func", 1, args);
   if(args->type != P_BLOCK) {
     fprintf(stderr, "func: body must be quoted exp\n");
     exit(1);
@@ -51,8 +51,6 @@ p_atom *blt_cond(p_atom *args, p_atom **vars) {
 
 /* returns value of last argument */
 p_atom *blt_last(p_atom *args, p_atom **vars) {
-  p_atom *atom = atom_tail(args);
-  if(!atom) { return NIL_ATOM; }
-  return atom;
+  return atom_tail(args);
 }
 

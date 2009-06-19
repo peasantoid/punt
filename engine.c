@@ -87,10 +87,7 @@ p_atom *parse_tokens(p_atom *tokens) {
 
 void run_code(p_atom *code, p_atom **vars) {
   while(code) {
-    /* it's an expression; execute it */
-    if(code->type == PT_EXP) {
-      run_exp(code, vars);
-    }
+    run_exp(code, vars);
     code = (p_atom *)code->next;
   }
 }
@@ -114,6 +111,10 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
     /* we can run it */
     case PT_EXP:
       break;
+    /* it evaluates to a symbol */
+    case PT_LITSYM:
+      return make_atom(P_SYM, "", exp->value);
+      break;
     /* we can resolve it */
     case P_SYM:
       return resolve_symbol(*vars, (char *)exp->value);
@@ -128,14 +129,17 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
   while(_args) {
     switch(_args->type) {
       case PT_EXP:
-        atom_append(&args, run_exp(_args, vars));
+        atom_append(&args, atom = run_exp(_args, vars));
+//        printf("#%d\n", atom->type);
         break;
       case P_SYM:
         atom = resolve_symbol(*vars, (char *)_args->value);
         atom_append(&args, make_atom(atom->type, "", atom->value));
+//        printf(":%s\n", (char *)_args->value);
         break;
       case PT_LITSYM:
         atom_append(&args, make_atom(P_SYM, "", _args->value));
+//        printf("!%s\n", (char *)_args->value);
         break;
       default:
         atom_append(&args, make_atom(_args->type, "", _args->value));
@@ -204,19 +208,42 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
 }
 
 void check_argc(const char *func, const int minlen, p_atom *args) {
+  if(minlen >= 0) {
+    if(atom_len(args) != minlen) {
+      fprintf(stderr , "%s: exactly %d %s required, %d given\n", func, minlen,
+          minlen == 1 ? "arg" : "args", atom_len(args));
+      exit(1);
+    }
   /* must be exact */
-  if(minlen <= 0) {
-    if(atom_len(args) != abs(minlen)) {
-      fprintf(stderr , "%s: exactly %d %s required, %d given\n", func, abs(minlen),
+  } else {
+    if(atom_len(args) < abs(minlen)) {
+      fprintf(stderr, "%s: at least %d %s required, %d given\n", func, abs(minlen),
           minlen == -1 ? "arg" : "args", atom_len(args));
       exit(1);
     }
-  } else {
-    if(atom_len(args) < minlen) {
-      fprintf(stderr, "%s: at least %d %s required, %d given\n", func, minlen,
-          minlen == 1 ? "arg" : "args", minlen);
-      exit(1);
-    }
   }
+}
+
+int load_module(const char *path, p_atom **vars) {
+  void *module;
+  char **(*namesptr)(void), **names;
+  p_atom *(*funcptr)(p_atom *, p_atom **);
+  
+  module = dlopen(path, RTLD_LAZY); /* or RTLD_NOW? */
+  if(!module) { return 0; }
+
+  namesptr = dlsym(module, "_punt_report_funcs");
+  if(!namesptr) { return 0; }
+
+  names = (*namesptr)();
+  while(*names) {
+    funcptr = dlsym(module, vafmt("punt_%s", *names));
+    if(!funcptr) { return 0; }
+    atom_setname(vars, make_atom(P_MFUNC, *names, funcptr));
+
+    names++;
+  }
+
+  return 1;
 }
 
