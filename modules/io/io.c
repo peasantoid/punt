@@ -17,7 +17,7 @@
 
 #include "../../common.h"
 
-char **_punt_report_funcs(void) {
+MFUNC_REPORT {
   char **funcs = (char **)calloc(8, sizeof(char *));
 
   funcs[0] = "stdout";
