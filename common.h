@@ -28,16 +28,17 @@
 
 /* identifies the type of an item */
 typedef enum {
-  P_NIL,
+  P_NIL, /* nil/false/null */
   P_NUM,
   P_STR,
-  P_SYM,
+  P_SYM, /* symbol: something */
   P_STRUCT,
-  P_BLOCK,
+  P_BLOCK, /* .( ... ) */
   P_LIST,
-  P_MFUNC,
-  P_FUNC,
-  P_UDEF, /* user-defined */
+  P_MFUNC, /* module function */
+  P_FUNC, /* user-defined function */
+  P_FILE, /* file pointer/stream */
+  P_RSRC, /* resource (anything else) */
 
   /* token types */
   PT_PARENL,
@@ -63,6 +64,8 @@ typedef struct {
 
 typedef double p_num;
 
+#define MFUNC_PROTO(f) p_atom *punt_##f(p_atom *args, p_atom **vars)
+
 /* atom.c */
 p_atom *make_atom(unsigned int, const char *, void *);
 p_atom *atom_tail(p_atom *);
@@ -74,7 +77,9 @@ p_atom *atom_getname(p_atom *, const char *);
 p_atom *atom_dup(p_atom *);
 void atom_setname(p_atom **, p_atom *);
 int atom_true(p_atom *);
-#define NIL_ATOM make_atom(P_NIL, "", NULL);
+#define NIL_ATOM make_atom(P_NIL, "", NULL)
+#define TRUE_ATOM make_atom(P_NUM, "", atom_dupnum(0))
+#define ATOM_NEXT(a) a = (p_atom *)a->next
 
 /* tokenizer.c */
 p_atom *tokenize_fp(FILE *);
@@ -94,16 +99,5 @@ int str_pos(const char *, const char *, unsigned int);
 char *str_replace(const char *, const char *, const char *, unsigned int);
 
 /* builtins.c */
-p_atom *register_builtins(void);
-p_atom *blt_yes(p_atom *, p_atom **);
-p_atom *blt_no(p_atom *, p_atom **);
-p_atom *blt_fmt(p_atom *, p_atom **);
-p_atom *blt_prt(p_atom *, p_atom **);
-p_atom *blt_typenum(p_atom *, p_atom **);
-  /* flow.c */
-  p_atom *blt_func(p_atom *, p_atom **);
-  p_atom *blt_cond(p_atom *, p_atom **);
-  p_atom *blt_last(p_atom *, p_atom **);
-  /* module.c */
-  p_atom *blt_use(p_atom *, p_atom **);
+void register_builtins(p_atom **);
 

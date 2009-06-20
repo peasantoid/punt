@@ -32,11 +32,18 @@ make_punt() {
 
 make_modules() {
   echo 'Building modules...'
-
+  
+  export OBJ_DIR="$PWD/build/punt/obj"
   for mod in modules/*; do
-    echo -n '  '; basename "$mod"
-    gcc "$mod/"*.c build/punt/obj/*.o -o "build/$mod.so" \
-      -fPIC -shared
+    modname=$(basename "$mod")
+    echo "  $modname"
+    oldwd=$(pwd)
+
+    cd "$mod" &&
+    bash ./make &&
+    cd "$oldwd" &&
+
+    cp "$mod/$modname.so" build/modules
   done
 }
 

@@ -17,75 +17,7 @@
 
 #include "common.h"
 
-p_atom *register_builtins(void) {
-  p_atom *vars = NULL;
-
-  atom_setname(&vars, make_atom(P_MFUNC, "func", &blt_func));
-  atom_setname(&vars, make_atom(P_MFUNC, "cond", &blt_cond));
-  atom_setname(&vars, make_atom(P_MFUNC, "last", &blt_last));
-
-  atom_setname(&vars, make_atom(P_MFUNC, "yes", &blt_yes));
-  atom_setname(&vars, make_atom(P_MFUNC, "no", &blt_no));
-  atom_setname(&vars, make_atom(P_MFUNC, "fmt", &blt_fmt));
-  atom_setname(&vars, make_atom(P_MFUNC, "prt", &blt_prt));
-  atom_setname(&vars, make_atom(P_MFUNC, "typenum", &blt_typenum));
-  atom_setname(&vars, make_atom(P_MFUNC, "use", &blt_use));
-
-  return vars;
-}
-
-#include "blt/flow.c"
-
-/* return true */
-p_atom *blt_yes(p_atom *args, p_atom **vars) {
-  check_argc("yes", 0, args);
-  return make_atom(P_NUM, "", atom_dupnum(1));
-}
-
-/* return false */
-p_atom *blt_no(p_atom *args, p_atom **vars) {
-  check_argc("no", 0, args);
-  return NIL_ATOM;
-}
-
-/* intelligently format args into string form */
-p_atom *blt_fmt(p_atom *args, p_atom **vars) {
-  char *rval = "";
-
-  while(args) {
-    if(args->type == P_NUM) {
-      asprintf(&rval, "%s%f", rval, *(p_num *)args->value);
-    } else if(args->type == P_STR) {
-      asprintf(&rval, "%s%s", rval, (char *)args->value);
-    } else {
-      asprintf(&rval, "%s?", rval);
-    }
-    args = (p_atom *)args->next;
-  }
-
-  return make_atom(P_STR, "", (void *)rval);
-}
-
-/* print a string */
-p_atom *blt_prt(p_atom *args, p_atom **vars) {
-  check_argc("prt", 1, args);
-  if(args->type != P_STR) {
-    fprintf(stderr, "prt: string required\n");
-    exit(1);
-  }
-  
-  printf("%s", (char *)args->value);
-  fflush(stdout);
-
-  return NIL_ATOM;
-}
-
-/* return type number */
-p_atom *blt_typenum(p_atom *args, p_atom **vars) {
-  check_argc("typenum", 1, args);
-  return make_atom(P_NUM, "", atom_dupnum(args->type));
-}
-
+/* load module */
 p_atom *blt_use(p_atom *args, p_atom **vars) {
   char *path;
 
@@ -105,5 +37,10 @@ p_atom *blt_use(p_atom *args, p_atom **vars) {
   }
 
   return NIL_ATOM;
+}
+
+/* register built-in variables */
+void register_builtins(p_atom **vars) {
+  atom_setname(vars, make_atom(P_MFUNC, "use", &blt_use));
 }
 
