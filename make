@@ -35,7 +35,7 @@ make_modules() {
   
   export OBJ_DIR="$PWD/build/punt/obj"
   for mod in modules/*; do
-    modname=$(basename "$mod")
+    export modname=$(basename "$mod")
     echo "  $modname"
     oldwd=$(pwd)
 

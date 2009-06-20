@@ -17,7 +17,7 @@
 
 #include "../../common.h"
 
-char **_punt_report_funcs(void) {
+MFUNC_REPORT {
   char **funcs = (char **)calloc(4, sizeof(char *));
 
   funcs[0] = "sfmt";
@@ -38,6 +38,9 @@ MFUNC_PROTO(sfmt) {
       case P_NUM:
         asprintf((char **)&rval->value, "%s%f", (char *)rval->value, *(p_num *)args->value);
         break;
+      case P_NIL:
+        asprintf((char **)&rval->value, "%snil", (char *)rval->value);
+        break;
       default:
         asprintf((char **)&rval->value, "%s?", (char *)rval->value);
         break;
@@ -49,10 +52,35 @@ MFUNC_PROTO(sfmt) {
 }
 
 MFUNC_PROTO(sfind) {
-  return NIL_ATOM;
+  p_atom *orig = args;
+
+  check_argc("sfind", 2, args);
+  while(args) {
+    if(args->type != P_STR) {
+      fprintf(stderr, "sfind: all args must be strings\n");
+      exit(1);
+    }
+    ATOM_NEXT(args);
+  } args = orig;
+
+  return make_atom(P_NUM, "", atom_dupnum(str_pos(
+          (char *)args->value, (char *)atom_getindex(args, 1)->value, 0)));
 }
 
 MFUNC_PROTO(srepl) {
-  return NIL_ATOM;
+  p_atom *orig = args;
+
+  check_argc("srepl", 3, args);
+  while(args) {
+    if(args->type != P_STR) {
+      fprintf(stderr, "srepl: all args must be strings\n");
+      exit(1);
+    }
+    ATOM_NEXT(args);
+  } args = orig;
+
+  return make_atom(P_STR, "", str_replace(
+          (char *)args->value, (char *)atom_getindex(args, 1)->value,
+          (char *)atom_getindex(args, 2)->value, 0));
 }
 

@@ -46,7 +46,7 @@ int str_pos(const char *target, const char *search, unsigned int start) {
  * This function is probably f'ing hideous.
  */
 char *str_replace(const char *target, const char *search, const char *replace,
-unsigned int start) {
+    unsigned int start) {
   char *result, *left, *right;
   int pos;
 

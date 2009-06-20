@@ -64,6 +64,7 @@ typedef struct {
 
 typedef double p_num;
 
+#define MFUNC_REPORT char **_punt_report_funcs(void)
 #define MFUNC_PROTO(f) p_atom *punt_##f(p_atom *args, p_atom **vars)
 
 /* atom.c */
@@ -78,7 +79,7 @@ p_atom *atom_dup(p_atom *);
 void atom_setname(p_atom **, p_atom *);
 int atom_true(p_atom *);
 #define NIL_ATOM make_atom(P_NIL, "", NULL)
-#define TRUE_ATOM make_atom(P_NUM, "", atom_dupnum(0))
+#define TRUE_ATOM make_atom(P_NUM, "", atom_dupnum(1))
 #define ATOM_NEXT(a) a = (p_atom *)a->next
 
 /* tokenizer.c */

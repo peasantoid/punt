@@ -1,4 +1,4 @@
 #!/bin/bash
-gcc math.c -o math.so -fPIC -shared -Wall \
-  "$OBJ_DIR"/{atom,engine}.o \
-  -l m
+gcc "$modname.c" -o "$modname.so" -fPIC -shared -Wall \
+  "$OBJ_DIR"/*.o
+

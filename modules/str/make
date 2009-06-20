@@ -1,3 +1,4 @@
 #!/bin/bash
-gcc str.c -o str.so -fPIC -shared -Wall \
-  "$OBJ_DIR"/{atom,engine,string}.o
+gcc "$modname.c" -o "$modname.so" -fPIC -shared -Wall \
+  "$OBJ_DIR"/*.o
+

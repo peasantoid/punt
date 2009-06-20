@@ -32,6 +32,11 @@ char **_punt_report_funcs(void) {
   return funcs;
 }
 
+void seterr(p_atom **vars, int err) {
+  atom_setname(vars, make_atom(P_NUM, "__io_errno", atom_dupnum(err)));
+  atom_setname(vars, make_atom(P_STR, "__io_errstr", strerror(err)));
+}
+
 MFUNC_PROTO(stdout) {
   return make_atom(P_FILE, "", (void *)stdout);
 }
@@ -67,7 +72,10 @@ MFUNC_PROTO(fput) {
     fprintf(stderr, "fput: arg 2 must be string\n");
     exit(1);
   }
-  if(fputs((char *)atom_getindex(args, 1)->value, (FILE *)args->value) == EOF) {
+  seterr(vars, 0);
+  if(fputs((char *)atom_getindex(args, 1)->value, (FILE *)args->value) == EOF ||
+      fflush((FILE *)args->value) == EOF) {
+    seterr(vars, errno);
     return NIL_ATOM;
   }
   return TRUE_ATOM;
