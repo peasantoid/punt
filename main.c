@@ -25,18 +25,13 @@ int main(const int argc, const char **argv) {
   register_builtins(&vars);
 
   for(i = 1; i < argc; i++) {
-    /*
-     * check for directory: code contributed by vkumar
-     * for some reason, we're allowed to fopen() directories
-     */
-    if(lstat(argv[i], &finfo) == -1 || S_ISDIR(finfo.st_mode)) {
-      if(S_ISDIR(finfo.st_mode)) {
-        fprintf(stderr, "%s: Is a directory\n", argv[i]);
-      } else {
-        perror(argv[i]);
-      }
-      return 1;
-    }
+     if(stat(argv[i], &finfo) == -1) {
+       perror(argv[i]);
+       return 1;
+     } else if (!S_ISREG(finfo.st_mode)) {
+       fprintf(stderr, "%s: Not a regular file.\n", argv[i]);
+       return 1;
+     }
 
     fp = fopen(argv[i], "r");
     if(!fp) {

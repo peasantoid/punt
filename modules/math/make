@@ -1,4 +1,5 @@
 #!/bin/bash
-gcc *.c -o "$modname.so" -fPIC -shared -Wall \
-  "$OBJ_DIR"/*.o
+gcc *.c -o "$MOD_NAME.so" -fPIC -shared -Wall \
+  "$OBJ_DIR"/*.o \
+  -l m
 
