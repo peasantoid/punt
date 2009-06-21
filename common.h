@@ -30,12 +30,9 @@
 #define P_NUM str_hash("num")
 #define P_STR str_hash("str")
 #define P_SYM str_hash("sym")
-#define P_STRUCT str_hash("struct")
 #define P_BLOCK str_hash("block")
-#define P_LIST str_hash("list")
 #define P_MFUNC str_hash("mfunc")
 #define P_FUNC str_hash("func")
-#define P_FILE str_hash("file")
 
 #define PT_PARENL str_hash("_parenl")
 #define PT_PARENR str_hash("_parenr")

@@ -17,6 +17,8 @@
 
 #include "../../common.h"
 
+#define P_FILE str_hash("file")
+
 MFUNC_REPORT {
   char **funcs = (char **)calloc(8, sizeof(char *));
 

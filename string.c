@@ -68,9 +68,10 @@ char *str_replace(const char *target, const char *search, const char *replace,
   return result;
 }
 
+/* from http://www.cse.yorku.ca/~oz/hash.html */
 unsigned long str_hash(const char *str) {
-  /* making this static causes problems */
-  unsigned long hash = 5381;
+  static unsigned long hash;
+    hash = 5381;
   static int c;
 
   while((c = *(str++)) != '\0') {

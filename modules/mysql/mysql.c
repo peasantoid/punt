@@ -23,13 +23,24 @@
 MFUNC_REPORT {
   char **funcs = (char **)calloc(3, sizeof(char *));
 
-  funcs[0] = "mysql_init";
+  funcs[0] = "mysql_connect";
 
   return funcs;
 }
 
-MFUNC_PROTO(mysql_init) {
-  p_atom *rval = make_atom(P_MYSQL, "", (void *)mysql_init(NULL));
-  return rval;
+MFUNC_PROTO(mysql_connect) {
+  check_argc("mysql_connect", 4, args);
+  p_atom *orig = args;
+  while(args) {
+    if(args->type != P_STR) {
+      fprintf(stderr, "mysql_connect: all arguments must be strings\n");
+      exit(1);
+    }
+    ATOM_NEXT(args);
+  } args = orig;
+  
+  MYSQL *rval = mysql_init(NULL);
+
+  return make_atom(P_MYSQL, "", (void *)rval);
 }
 
