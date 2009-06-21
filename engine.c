@@ -126,7 +126,7 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
     _args = (p_atom *)_args->next;
   }
 
-  rval = make_atom(P_NIL, "", NULL);
+  rval = NIL_ATOM;
   if(!atom_len(args)) { return rval; }
   func = args;
   args = (p_atom *)args->next;
@@ -137,6 +137,7 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
       exit(1);
     }
     atom_setname(vars, make_atom(args->type, (char *)func->value, args->value));
+    rval = args;
   } else if(func->type == P_FUNC) {
     funcvars = NULL;
     /* only pass down functions */

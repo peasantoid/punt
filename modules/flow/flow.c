@@ -18,12 +18,14 @@
 #include "../../common.h"
 
 MFUNC_REPORT {
-  char **funcs = (char **)calloc(5, sizeof(char *));
+  char **funcs = (char **)calloc(7, sizeof(char *));
 
   funcs[0] = "func";
   funcs[1] = "cond";
   funcs[2] = "last";
   funcs[3] = "if";
+  funcs[4] = "exit";
+  funcs[5] = "while";
 
   return funcs;
 }
@@ -69,7 +71,50 @@ MFUNC_PROTO(last) {
 }
 
 MFUNC_PROTO(if) {
-  check_argc("if", 1, args);
+  check_argc("if", 2, args);
+  p_atom *cond = args;
+  p_atom *code = atom_getindex(args, 1);
+  if(code->type != P_BLOCK) {
+    fprintf(stderr, "if: arg 2 must be a quoted sexp\n");
+    exit(1);
+  }
+
+  if(atom_true(cond)) {
+    return run_exp(make_atom(PT_EXP, "", code->value), vars);
+  }
+
   return NIL_ATOM;
+}
+
+MFUNC_PROTO(exit) {
+  check_argc("exit", 1, args);
+  if(args->type != P_NUM) {
+    fprintf(stderr, "exit: return code must be a number\n");
+    exit(1);
+  }
+
+  exit(*(p_num *)args->value);
+
+  return NIL_ATOM;
+}
+
+MFUNC_PROTO(while) {
+  check_argc("while", 2, args);
+  p_atom *orig = args;
+  while(args) {
+    if(args->type != P_BLOCK) {
+      fprintf(stderr, "while: all args must be quoted sexps\n");
+      exit(1);
+    }
+    ATOM_NEXT(args);
+  } args = orig;
+
+  p_atom *rval = NIL_ATOM;
+
+  while(atom_true(run_exp(make_atom(PT_EXP, "", args->value), vars))) {
+    rval = run_exp(make_atom(PT_EXP, "", atom_getindex(args, 1)->value), vars);
+  }
+
+  return rval;
 }
 

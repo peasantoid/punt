@@ -19,25 +19,43 @@
 #include <mysql.h>
 
 #define P_MYSQL str_hash("mysql")
+#define P_MYSQL_RES str_hash("mysql_res")
+#define P_MYSQL_ROW str_hash("mysql_row")
+
+char *errstr;
 
 MFUNC_REPORT {
-  char **funcs = (char **)calloc(3, sizeof(char *));
+  char **funcs = (char **)calloc(6, sizeof(char *));
 
   funcs[0] = "mysql_connect";
+  funcs[1] = "mysql_query";
+  funcs[2] = "mysql_error";
+  funcs[3] = "mysql_fetch_row";
+  funcs[4] = "mysql_field";
 
+  errstr = "";
   return funcs;
 }
 
+void seterr(p_atom **vars, MYSQL *conn) {
+  errstr = (char *)mysql_error(conn);
+  atom_setname(vars, make_atom(P_STR, "__mysql_errstr", (void *)mysql_error(conn)));
+}
+
 MFUNC_PROTO(mysql_connect) {
-  check_argc("mysql_connect", 4, args);
-  p_atom *orig = args;
-  while(args) {
-    if(args->type != P_STR) {
-      fprintf(stderr, "mysql_connect: all arguments must be strings\n");
+  check_argc("mysql_connect", 5, args);
+
+  static int i;
+  for(i = 0; i < 4; i++) {
+    if(atom_getindex(args, i)->type != P_STR) {
+      fprintf(stderr, "mysql_connect: arg %d must be string\n", i + 1);
       exit(1);
     }
-    ATOM_NEXT(args);
-  } args = orig;
+  }
+  if(atom_getindex(args, 4)->type != P_NUM) {
+    fprintf(stderr, "mysql_connect: arg 5 must be number\n");
+    exit(1);
+  }
   
   MYSQL *rval = mysql_init(NULL);
   if(!mysql_real_connect(
@@ -46,13 +64,68 @@ MFUNC_PROTO(mysql_connect) {
         (char *)atom_getindex(args, 1)->value,
         (char *)atom_getindex(args, 2)->value,
         (char *)atom_getindex(args, 3)->value,
-        0,
+        (int)*(p_num *)atom_getindex(args, 4)->value,
         NULL,
         0)) {
-    atom_setname(vars, make_atom(P_STR, "__mysql_errstr", (void *)mysql_error(rval)));
+    seterr(vars, rval);
     return NIL_ATOM;
   }
 
   return make_atom(P_MYSQL, "", (void *)rval);
+}
+
+MFUNC_PROTO(mysql_query) {
+  check_argc("mysql_query", 2, args);
+  if(args->type != P_MYSQL) {
+    fprintf(stderr, "mysql_query: arg 1 must be MySQL connection\n");
+    exit(1);
+  } else if(atom_getindex(args, 1)->type != P_STR) {
+    fprintf(stderr, "mysql_query: arg 2 must be string\n");
+    exit(1);
+  }
+  MYSQL *conn = (MYSQL *)args->value;
+  char *qstr = (char *)atom_getindex(args, 1)->value;
+
+  if(mysql_query(conn, qstr)) {
+    seterr(vars, conn);
+    return NIL_ATOM;
+  }
+
+  MYSQL_RES *res = mysql_use_result(conn);
+
+  return make_atom(P_MYSQL_RES, "", (void *)res);
+}
+
+MFUNC_PROTO(mysql_error) {
+  return make_atom(P_STR, "", (void *)errstr);
+}
+
+MFUNC_PROTO(mysql_fetch_row) {
+  check_argc("mysql_fetch_row", 1, args);
+  if(args->type != P_MYSQL_RES) {
+    fprintf(stderr, "mysql_fetch_row: arg 1 must be MySQL result\n");
+    exit(1);
+  }
+
+  MYSQL_ROW row = mysql_fetch_row((MYSQL_RES *)args->value);
+  if(!row) {
+    return NIL_ATOM;
+  }
+  return make_atom(P_MYSQL_ROW, "", (void *)row);
+}
+
+MFUNC_PROTO(mysql_field) {
+  check_argc("mysql_field", 2, args);
+  if(args->type != P_MYSQL_ROW) {
+    fprintf(stderr, "mysql_field: arg 1 must be MySQL row\n");
+    exit(1);
+  } else if(atom_getindex(args, 1)->type != P_NUM) {
+    fprintf(stderr, "mysql_field: arg 2 must be number\n");
+    exit(1);
+  }
+
+  char *field = ((MYSQL_ROW)args->value)
+        [(int)*(p_num *)atom_getindex(args, 1)->value];
+  return make_atom(P_STR, "", (void *)field);
 }
 
