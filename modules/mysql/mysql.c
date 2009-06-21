@@ -40,6 +40,18 @@ MFUNC_PROTO(mysql_connect) {
   } args = orig;
   
   MYSQL *rval = mysql_init(NULL);
+  if(!mysql_real_connect(
+        rval,
+        (char *)args->value,
+        (char *)atom_getindex(args, 1)->value,
+        (char *)atom_getindex(args, 2)->value,
+        (char *)atom_getindex(args, 3)->value,
+        0,
+        NULL,
+        0)) {
+    atom_setname(vars, make_atom(P_STR, "__mysql_errstr", (void *)mysql_error(rval)));
+    return NIL_ATOM;
+  }
 
   return make_atom(P_MYSQL, "", (void *)rval);
 }

@@ -18,20 +18,22 @@
 #include "../../common.h"
 
 MFUNC_REPORT {
-  char **funcs = (char **)calloc(4, sizeof(char *));
+  char **funcs = (char **)calloc(5, sizeof(char *));
 
   funcs[0] = "func";
   funcs[1] = "cond";
   funcs[2] = "last";
+  funcs[3] = "if";
 
   return funcs;
 }
 
 /* create a function */
 MFUNC_PROTO(func) {
+  check_argc("func", 1, args);
+
   p_atom *rval = make_atom(P_FUNC, "", NULL);
 
-  check_argc("func", 1, args);
   if(args->type != P_BLOCK) {
     fprintf(stderr, "func: body must be quoted exp\n");
     exit(1);
@@ -64,5 +66,10 @@ MFUNC_PROTO(cond) {
 /* returns value of last argument */
 MFUNC_PROTO(last) {
   return atom_tail(args);
+}
+
+MFUNC_PROTO(if) {
+  check_argc("if", 1, args);
+  return NIL_ATOM;
 }
 

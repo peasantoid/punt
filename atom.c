@@ -38,7 +38,7 @@ void *atom_dupnum(p_num num) {
 unsigned int atom_len(p_atom *atom) {
   static int i;
   for(i = 0; atom; i++) {
-    atom = (p_atom *)atom->next;
+    ATOM_NEXT(atom);
   }
   return i;
 }
@@ -68,11 +68,9 @@ void atom_append(p_atom **target, p_atom *new) {
 /* get the atom corresponding to an index */
 p_atom *atom_getindex(p_atom *atom, unsigned int index) {
   static unsigned int i;
-  for(i = 0; i < atom_len(atom); i++) {
-    if(i == index) {
-      return atom;
-    }
-    atom = (p_atom *)atom->next;
+  i = 0;
+  for(i = 0; i < index; i++) {
+    ATOM_NEXT(atom);
   }
   return atom;
 }
