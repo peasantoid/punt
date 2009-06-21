@@ -68,3 +68,15 @@ char *str_replace(const char *target, const char *search, const char *replace,
   return result;
 }
 
+unsigned long str_hash(const char *str) {
+  /* making this static causes problems */
+  unsigned long hash = 5381;
+  static int c;
+
+  while((c = *(str++)) != '\0') {
+    hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+  }
+
+  return hash;
+}
+

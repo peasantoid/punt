@@ -23,20 +23,37 @@ p_atom *parse_tokens(p_atom *tokens) {
   static unsigned int level;
 
   while(tokens) {
-    switch(tokens->type) {
-      case P_NUM:
-        atom_append(&code, make_atom(P_NUM, "", atom_dupnum(*(p_num *)tokens->value)));
-        break;
-      case P_STR:
-        atom_append(&code, make_atom(P_STR, "", (void *)strdup((char *)tokens->value)));
-        break;
-      case P_SYM:
-        atom_append(&code, make_atom(P_SYM, "", tokens->value));
-        break;
-      /* it's an expression */
-      case PT_PARENL:
+    if(tokens->type == P_NUM) {
+      atom_append(&code, make_atom(P_NUM, "", atom_dupnum(*(p_num *)tokens->value)));
+    } else if(tokens->type == P_STR) {
+      atom_append(&code, make_atom(P_STR, "", (void *)strdup((char *)tokens->value)));
+    } else if(tokens->type == P_SYM) {
+      atom_append(&code, make_atom(P_SYM, "", tokens->value));
+    /* it's an expression */
+    } else if(tokens->type == PT_PARENL) {
+      tokens = (p_atom *)tokens->next;
+      if(!tokens ) { break; }
+
+      list = NULL;
+      level = 1;
+      while(tokens) {
+        if(tokens->type == PT_PARENL) { level++; }
+        else if(tokens->type == PT_PARENR) { level--; }
+        if(level <= 0) { break; }
+
+        atom_append(&list, make_atom(tokens->type, "", tokens->value));
         tokens = (p_atom *)tokens->next;
-        if(!tokens ) { break; }
+      }
+      atom_append(&code, make_atom(PT_EXP, "", parse_tokens(list)));
+    /* it's a literal something-or-other */
+    } else if(tokens->type == PT_QUOTE) {
+      tokens = (p_atom *)tokens->next;
+      if(!tokens) { break; }
+
+      /* it's a block: .( ... ) */
+      else if(tokens->type == PT_PARENL) {
+        tokens = (p_atom *)tokens->next;
+        if(!tokens) { break; }
 
         list = NULL;
         level = 1;
@@ -48,36 +65,12 @@ p_atom *parse_tokens(p_atom *tokens) {
           atom_append(&list, make_atom(tokens->type, "", tokens->value));
           tokens = (p_atom *)tokens->next;
         }
-        atom_append(&code, make_atom(PT_EXP, "", parse_tokens(list)));
-        break;
-      case PT_QUOTE:
-        tokens = (p_atom *)tokens->next;
-        if(!tokens) { break; }
+        atom_append(&code, make_atom(P_BLOCK, "", parse_tokens(list)));
 
-        /* it's a block: .( ... ) */
-        else if(tokens->type == PT_PARENL) {
-          tokens = (p_atom *)tokens->next;
-          if(!tokens) { break; }
-
-          list = NULL;
-          level = 1;
-          while(tokens) {
-            if(tokens->type == PT_PARENL) { level++; }
-            else if(tokens->type == PT_PARENR) { level--; }
-            if(level <= 0) { break; }
-
-            atom_append(&list, make_atom(tokens->type, "", tokens->value));
-            tokens = (p_atom *)tokens->next;
-          }
-          atom_append(&code, make_atom(P_BLOCK, "", parse_tokens(list)));
-
-        /* it's a quoted symbol: .something */
-        } else if(tokens->type == P_SYM) {
-          atom_append(&code, make_atom(PT_LITSYM, "", tokens->value));
-        }
-        break;
-      default:
-        break;
+      /* it's a quoted symbol: .something */
+      } else if(tokens->type == P_SYM) {
+        atom_append(&code, make_atom(PT_LITSYM, "", tokens->value));
+      }
     }
     if(tokens) { tokens = (p_atom *)tokens->next; }
   }
@@ -107,43 +100,28 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
   p_atom *(*funcptr)(p_atom *, p_atom **) = NULL;
   int i;
   
-  switch(exp->type) {
-    /* we can run it */
-    case PT_EXP:
-      break;
-    /* it evaluates to a symbol */
-    case PT_LITSYM:
-      return make_atom(P_SYM, "", exp->value);
-      break;
-    /* we can resolve it */
-    case P_SYM:
-      return resolve_symbol(*vars, (char *)exp->value);
-      break;
-    /* we can't run or resolve it, so return it */
-    default:
-      return exp;
-      break;
+  /* it evaluates to a symbol */
+  if(exp->type == PT_LITSYM) {
+    return make_atom(P_SYM, "", exp->value);
+  /* we can resolve it */
+  } else if(exp->type == P_SYM) {
+    return resolve_symbol(*vars, (char *)exp->value);
+  /* otherwise, return it */
+  } else if(exp->type != PT_EXP) {
+    return exp;
   }
   _args = (p_atom *)exp->value;
 
   while(_args) {
-    switch(_args->type) {
-      case PT_EXP:
-        atom_append(&args, atom = run_exp(_args, vars));
-//        printf("#%d\n", atom->type);
-        break;
-      case P_SYM:
-        atom = resolve_symbol(*vars, (char *)_args->value);
-        atom_append(&args, make_atom(atom->type, "", atom->value));
-//        printf(":%s\n", (char *)_args->value);
-        break;
-      case PT_LITSYM:
-        atom_append(&args, make_atom(P_SYM, "", _args->value));
-//        printf("!%s\n", (char *)_args->value);
-        break;
-      default:
-        atom_append(&args, make_atom(_args->type, "", _args->value));
-        break;
+    if(_args->type == PT_EXP) {
+      atom_append(&args, atom = run_exp(_args, vars));
+    } else if(_args->type == P_SYM) {
+      atom = resolve_symbol(*vars, (char *)_args->value);
+      atom_append(&args, make_atom(atom->type, "", atom->value));
+    } else if(_args->type == PT_LITSYM) {
+      atom_append(&args, make_atom(P_SYM, "", _args->value));
+    } else {
+      atom_append(&args, make_atom(_args->type, "", _args->value));
     }
     _args = (p_atom *)_args->next;
   }
@@ -153,55 +131,50 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
   func = args;
   args = (p_atom *)args->next;
 
-  switch(func->type) {
-    case P_SYM:
-      if(atom_len(args) != 1) {
-        fprintf(stderr, "exactly 1 arg required for assignment, %d given\n", atom_len(args));
-        exit(1);
-      }
-      atom_setname(vars, make_atom(args->type, (char *)func->value, args->value));
-      break;
-    case P_FUNC:
-      funcvars = NULL;
-      /* only pass down functions */
-      orig = *vars;
-      while(*vars) {
-        if((*vars)->type == P_FUNC || (*vars)->type == P_MFUNC) {
-          /* using make_atom() so we don't bring the rest of the scope along as well */
-          atom_setname(&funcvars, make_atom((*vars)->type, (*vars)->name, (*vars)->value));
-        }
-        *vars = (p_atom *)(*vars)->next;
-      }
-      *vars = orig;
-
-      /* set some special variables */
-      atom_setname(&funcvars, make_atom(P_FUNC, "__func", func));
-      atom_setname(&funcvars, make_atom(P_NUM, "__argc", atom_dupnum(atom_len(args))));
-      
-      /* arguments referring to variables */
-      i = 1;
-      orig = args;
-      while(args) {
-        atom_setname(&funcvars, make_atom(args->type, vafmt("_%d", i), args->value));
-        args = (p_atom *)args->next;
-        i++;
-      }
-      args = orig;
-
-      /*
-       * convert the func to an exp so the engine will know to run it
-       * rather than return its value
-       */
-      rval = run_exp(make_atom(PT_EXP, "", func->value), &funcvars);
-      break;
-    case P_MFUNC:
-      funcptr = func->value;
-      rval = (*funcptr)(args, vars);
-      break;
-    default:
-      fprintf(stderr, "type not callable\n");
+  if(func->type == P_SYM) {
+    if(atom_len(args) != 1) {
+      fprintf(stderr, "exactly 1 arg required for assignment, %d given\n", atom_len(args));
       exit(1);
-      break;
+    }
+    atom_setname(vars, make_atom(args->type, (char *)func->value, args->value));
+  } else if(func->type == P_FUNC) {
+    funcvars = NULL;
+    /* only pass down functions */
+    orig = *vars;
+    while(*vars) {
+      if((*vars)->type == P_FUNC || (*vars)->type == P_MFUNC) {
+        /* using make_atom() so we don't bring the rest of the scope along as well */
+        atom_setname(&funcvars, make_atom((*vars)->type, (*vars)->name, (*vars)->value));
+      }
+      *vars = (p_atom *)(*vars)->next;
+    }
+    *vars = orig;
+
+    /* set some special variables */
+    atom_setname(&funcvars, make_atom(P_FUNC, "__func", func->value));
+    atom_setname(&funcvars, make_atom(P_NUM, "__argc", atom_dupnum(atom_len(args))));
+    
+    /* arguments referring to variables */
+    i = 1;
+    orig = args;
+    while(args) {
+      atom_setname(&funcvars, make_atom(args->type, vafmt("_%d", i), args->value));
+      args = (p_atom *)args->next;
+      i++;
+    }
+    args = orig;
+
+    /*
+     * convert the func to an exp so the engine will know to run it
+     * rather than return its value
+     */
+    rval = run_exp(make_atom(PT_EXP, "", func->value), &funcvars);
+  } else if(func->type == P_MFUNC) {
+    funcptr = func->value;
+    rval = (*funcptr)(args, vars);
+  } else {
+    fprintf(stderr, "type not callable\n");
+    exit(1);
   }
 
   return rval;

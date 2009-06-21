@@ -1,0 +1,4 @@
+#!/bin/bash
+gcc *.c -o "$MOD_NAME.so" -fPIC -shared -Wall \
+  "$OBJ_DIR"/*.o $(mysql_config --cflags --libs)
+

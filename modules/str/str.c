@@ -31,19 +31,14 @@ MFUNC_PROTO(sfmt) {
   p_atom *rval = make_atom(P_STR, "", (void *)"");
 
   while(args) {
-    switch(args->type) {
-      case P_STR:
-        asprintf((char **)&rval->value, "%s%s", (char *)rval->value, (char *)args->value);
-        break;
-      case P_NUM:
-        asprintf((char **)&rval->value, "%s%f", (char *)rval->value, *(p_num *)args->value);
-        break;
-      case P_NIL:
-        asprintf((char **)&rval->value, "%snil", (char *)rval->value);
-        break;
-      default:
-        asprintf((char **)&rval->value, "%s?", (char *)rval->value);
-        break;
+    if(args->type == P_STR) {
+      asprintf((char **)&rval->value, "%s%s", (char *)rval->value, (char *)args->value);
+    } else if(args->type == P_NUM) {
+      asprintf((char **)&rval->value, "%s%f", (char *)rval->value, *(p_num *)args->value);
+    } else if(args->type == P_NIL) {
+      asprintf((char **)&rval->value, "%s(nil)", (char *)rval->value);
+    } else {
+      asprintf((char **)&rval->value, "%s(unknown)", (char *)rval->value);
     }
     ATOM_NEXT(args);
   }

@@ -26,27 +26,44 @@
 #include <dlfcn.h>
 #include <libgen.h>
 
-/* identifies the type of an item */
-typedef enum {
-  P_NIL, /* nil/false/null */
-  P_NUM,
-  P_STR,
-  P_SYM, /* symbol: something */
-  P_STRUCT,
-  P_BLOCK, /* .( ... ) */
-  P_LIST,
-  P_MFUNC, /* module function */
-  P_FUNC, /* user-defined function */
-  P_FILE, /* file pointer/stream */
-  P_RSRC, /* resource (anything else) */
+#define P_NIL str_hash("nil")
+#define P_NUM str_hash("num")
+#define P_STR str_hash("str")
+#define P_SYM str_hash("sym")
+#define P_STRUCT str_hash("struct")
+#define P_BLOCK str_hash("block")
+#define P_LIST str_hash("list")
+#define P_MFUNC str_hash("mfunc")
+#define P_FUNC str_hash("func")
+#define P_FILE str_hash("file")
 
-  /* token types */
-  PT_PARENL,
-  PT_PARENR,
-  PT_LITSYM, /* a quoted symbol: .something */
-  PT_QUOTE,
-  PT_EXP
-} p_type;
+#define PT_PARENL str_hash("_parenl")
+#define PT_PARENR str_hash("_parenr")
+#define PT_LITSYM str_hash("_litsym")
+#define PT_QUOTE str_hash("_quote")
+#define PT_EXP str_hash("_exp")
+
+/* identifies the type of an item */
+//typedef enum {
+//  P_NIL, /* nil/false/null */
+//  P_NUM,
+//  P_STR,
+//  P_SYM, /* symbol: something */
+//  P_STRUCT,
+//  P_BLOCK, /* .( ... ) */
+//  P_LIST,
+//  P_MFUNC, /* module function */
+//  P_FUNC, /* user-defined function */
+//  P_FILE, /* file pointer/stream */
+//  P_RSRC, /* anything else */
+//
+//  /* token types */
+//  PT_PARENL,
+//  PT_PARENR,
+//  PT_LITSYM, /* a quoted symbol: .something */
+//  PT_QUOTE,
+//  PT_EXP
+//} p_type;
 
 typedef struct {
 
@@ -54,7 +71,7 @@ typedef struct {
 
 /* serves as just about everything */
 typedef struct {
-  p_type type;
+  unsigned long type;
 
   char *name;
   void *value;
@@ -68,7 +85,7 @@ typedef double p_num;
 #define MFUNC_PROTO(f) p_atom *punt_##f(p_atom *args, p_atom **vars)
 
 /* atom.c */
-p_atom *make_atom(unsigned int, const char *, void *);
+p_atom *make_atom(unsigned long, const char *, void *);
 p_atom *atom_tail(p_atom *);
 void atom_append(p_atom **, p_atom *);
 p_atom *atom_getindex(p_atom *, unsigned int);
@@ -98,6 +115,7 @@ int load_module(const char *, p_atom **);
 char *vafmt(const char *, ...);
 int str_pos(const char *, const char *, unsigned int);
 char *str_replace(const char *, const char *, const char *, unsigned int);
+unsigned long str_hash(const char *);
 
 /* builtins.c */
 void register_builtins(p_atom **);

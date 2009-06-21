@@ -16,6 +16,7 @@
  */
 
 #include "common.h"
+#define IS_SYMBOL_CHAR(c) (isalnum(c) || (!isspace(c) && !strchr(".()#'\"", c)))
 
 /* tokenizes the file pointed to by an open FILE* */
 p_atom *tokenize_fp(FILE *fp) {
@@ -103,11 +104,12 @@ p_atom *tokenize_str(const char *str) {
           
           atom_append(&tokens, make_atom(P_NUM, "", atom_dupnum(strtod(strv, NULL))));
           free(strv);
-        } else if(isalnum(str[i]) || str[i] == '_') {
+        /* TODO: allow non-alphanumeric characters */
+        } else if(IS_SYMBOL_CHAR(str[i])) {
           strv = (char *)calloc(2, sizeof(char));
           strv[0] = str[i];
 
-          for(i++; isalnum(str[i]) || str[i] == '_'; i++) {
+          for(i++; IS_SYMBOL_CHAR(str[i]); i++) {
             asprintf(&strv, "%s%c", strv, str[i]);
           }
           i--;
