@@ -181,23 +181,6 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
   return rval;
 }
 
-void check_argc(const char *func, const int minlen, p_atom *args) {
-  if(minlen >= 0) {
-    if(atom_len(args) != minlen) {
-      fprintf(stderr , "%s: exactly %d %s required, %d given\n", func, minlen,
-          minlen == 1 ? "arg" : "args", atom_len(args));
-      exit(1);
-    }
-  /* must be exact */
-  } else {
-    if(atom_len(args) < abs(minlen)) {
-      fprintf(stderr, "%s: at least %d %s required, %d given\n", func, abs(minlen),
-          minlen == -1 ? "arg" : "args", atom_len(args));
-      exit(1);
-    }
-  }
-}
-
 int load_module(const char *path, p_atom **vars) {
   void *module;
   char **(*namesptr)(void), **names;

@@ -17,7 +17,7 @@
 
 #include "common.h"
 
-char **_report_module(void *nullarg, ...) {
+char **_report_module(const void *nullarg, ...) {
   va_list ap;
   static char **funcs, *fname;
   static int len, i;
@@ -48,5 +48,28 @@ char **_report_module(void *nullarg, ...) {
   va_end(ap);
 
   return funcs;
+}
+
+void func_err(const char *func, const char *msg) {
+  fprintf(stderr, "%s: %s\n", func, msg);
+  exit(1);
+}
+
+void check_argc(const char *func, const int minlen, p_atom *args) {
+  /* must be exactly minlen args */
+  if(minlen >= 0) {
+    if(atom_len(args) != minlen) {
+      func_err(func, vafmt("exactly %d %s required, %d given", minlen,
+          minlen == 1 ? "arg" : "args", atom_len(args)));
+      exit(1);
+    }
+  /* must be at least minlen args */
+  } else {
+    if(atom_len(args) < abs(minlen)) {
+      func_err(func, vafmt("at least %d %s required, %d given", abs(minlen),
+          minlen == -1 ? "arg" : "args", atom_len(args)));
+      exit(1);
+    }
+  }
 }
 

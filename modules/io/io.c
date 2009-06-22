@@ -19,20 +19,14 @@
 
 #define P_FILE str_hash("file")
 
-MFUNC_REPORT {
-  char **funcs = (char **)calloc(8, sizeof(char *));
-
-  funcs[0] = "stdout";
-  funcs[1] = "stderr";
-  funcs[2] = "stdin";
-
-  funcs[3] = "fopen";
-  funcs[4] = "fclose";
-  funcs[5] = "fget";
-  funcs[6] = "fput";
-
-  return funcs;
-}
+REPORT_MODULE("stdout",
+              "stderr",
+              "stdin",
+              "fopen",
+              "fclose",
+              "fget",
+              "fput",
+              NULL);
 
 void seterr(p_atom **vars, int err) {
   atom_setname(vars, make_atom(P_NUM, "__io_errno", atom_dupnum(err)));

@@ -96,8 +96,12 @@ void register_builtins(p_atom **);
 
 /* helpers.c */
 #define REPORT_MODULE(...) char **_punt_report_funcs(void) { return _report_module(NULL, __VA_ARGS__); }
-/* we need a fixed argument because stdarg.h doesn't support functions without them */
-char **_report_module(void *, ...);
+/*
+ * we need a fixed argument because stdarg.h doesn't support functions
+ * without them
+ */
+char **_report_module(const void *, ...);
+void func_err(const char *, const char *);
 
 #endif
 

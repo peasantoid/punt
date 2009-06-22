@@ -24,21 +24,15 @@
 
 char *errstr;
 
-MFUNC_REPORT {
-  char **funcs = (char **)calloc(9, sizeof(char *));
-
-  funcs[0] = "mysql_connect";
-  funcs[1] = "mysql_query";
-  funcs[2] = "mysql_error";
-  funcs[3] = "mysql_fetch_row";
-  funcs[4] = "mysql_field";
-  funcs[5] = "mysql_escape";
-  funcs[6] = "mysql_free_result";
-  funcs[7] = "mysql_close";
-
-  errstr = "";
-  return funcs;
-}
+REPORT_MODULE("mysql_connect",
+              "mysql_query",
+              "mysql_error",
+              "mysql_fetch_row",
+              "mysql_field",
+              "mysql_escape",
+              "mysql_free_result",
+              "mysql_close",
+              NULL);
 
 void seterr(p_atom **vars, MYSQL *conn) {
   errstr = (char *)mysql_error(conn);
@@ -51,8 +45,7 @@ MFUNC_PROTO(mysql_connect) {
   static int i;
   for(i = 0; i < 4; i++) {
     if(atom_getindex(args, i)->type != P_STR) {
-      fprintf(stderr, "mysql_connect: arg %d must be string\n", i + 1);
-      exit(1);
+      func_err("mysql_connect", vafmt("arg %d must be string", i + 1));
     }
   }
   if(atom_getindex(args, 4)->type != P_NUM) {
