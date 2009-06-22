@@ -15,6 +15,9 @@
  * along with punt.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef COMMON_H
+#define COMMON_H
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <string.h>
@@ -39,32 +42,6 @@
 #define PT_LITSYM str_hash("_litsym")
 #define PT_QUOTE str_hash("_quote")
 #define PT_EXP str_hash("_exp")
-
-/* identifies the type of an item */
-//typedef enum {
-//  P_NIL, /* nil/false/null */
-//  P_NUM,
-//  P_STR,
-//  P_SYM, /* symbol: something */
-//  P_STRUCT,
-//  P_BLOCK, /* .( ... ) */
-//  P_LIST,
-//  P_MFUNC, /* module function */
-//  P_FUNC, /* user-defined function */
-//  P_FILE, /* file pointer/stream */
-//  P_RSRC, /* anything else */
-//
-//  /* token types */
-//  PT_PARENL,
-//  PT_PARENR,
-//  PT_LITSYM, /* a quoted symbol: .something */
-//  PT_QUOTE,
-//  PT_EXP
-//} p_type;
-
-typedef struct {
-
-} p_udef;
 
 /* serves as just about everything */
 typedef struct {
@@ -116,4 +93,11 @@ unsigned long str_hash(const char *);
 
 /* builtins.c */
 void register_builtins(p_atom **);
+
+/* helpers.c */
+#define REPORT_MODULE(...) char **_punt_report_funcs(void) { return _report_module(NULL, __VA_ARGS__); }
+/* we need a fixed argument because stdarg.h doesn't support functions without them */
+char **_report_module(void *, ...);
+
+#endif
 

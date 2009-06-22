@@ -7,9 +7,6 @@ make_punt() {
   echo 'Building interpreter...'
 
   gccflags="-Wall -D MOD_DIR=\"$MOD_DIR\" -fPIC"
-  
-  echo '  main' &&
-  gcc -c main.c -o build/punt/obj/main.o $gccflags &&
 
   echo '  atom' &&
   gcc -c atom.c -o build/punt/obj/atom.o $gccflags &&
@@ -26,7 +23,10 @@ make_punt() {
   echo '  builtins' &&
   gcc -c builtins.c -o build/punt/obj/builtins.o $gccflags &&
 
-  gcc build/punt/obj/*.o -o build/punt/punt -l dl
+  echo '  helpers' &&
+  gcc -c helpers.c -o build/punt/obj/helpers.o $gccflags &&
+
+  gcc main.c build/punt/obj/*.o -o build/punt/punt -l dl
 }
 
 make_modules() {

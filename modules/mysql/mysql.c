@@ -25,13 +25,16 @@
 char *errstr;
 
 MFUNC_REPORT {
-  char **funcs = (char **)calloc(6, sizeof(char *));
+  char **funcs = (char **)calloc(9, sizeof(char *));
 
   funcs[0] = "mysql_connect";
   funcs[1] = "mysql_query";
   funcs[2] = "mysql_error";
   funcs[3] = "mysql_fetch_row";
   funcs[4] = "mysql_field";
+  funcs[5] = "mysql_escape";
+  funcs[6] = "mysql_free_result";
+  funcs[7] = "mysql_close";
 
   errstr = "";
   return funcs;
@@ -127,5 +130,51 @@ MFUNC_PROTO(mysql_field) {
   char *field = ((MYSQL_ROW)args->value)
         [(int)*(p_num *)atom_getindex(args, 1)->value];
   return make_atom(P_STR, "", (void *)field);
+}
+
+MFUNC_PROTO(mysql_escape) {
+  check_argc("mysql_escape", 2, args);
+  if(args->type != P_MYSQL) {
+    fprintf(stderr, "mysql_escape: arg 1 must be MySQL connection\n");
+    exit(1);
+  } else if(atom_getindex(args, 1)->type != P_STR) {
+    fprintf(stderr, "mysql_escape: arg 2 must be string\n");
+    exit(1);
+  }
+
+  /*
+   * FIXME: basically defeats the purpose of passing the query
+   * length by hand
+   */
+  char *from = (char *)atom_getindex(args, 1)->value;
+  int len = strlen(from);
+  char *to = (char *)calloc((len * 2) + 1, sizeof(char));
+  mysql_real_escape_string((MYSQL *)args->value, to, from, len);
+
+  return make_atom(P_STR, "", (void *)to);
+}
+
+MFUNC_PROTO(mysql_free_result) {
+  check_argc("mysql_free_result", 1, args);
+  if(args->type != P_MYSQL_RES) {
+    fprintf(stderr, "mysql_free_result: arg 1 must be MySQL result\n");
+    exit(1);
+  }
+
+  mysql_free_result((MYSQL_RES *)args->value);
+
+  return NIL_ATOM;
+}
+
+MFUNC_PROTO(mysql_close) {
+  check_argc("mysql_close", 1, args);
+  if(args->type != P_MYSQL) {
+    fprintf(stderr, "mysql_close: arg 1 must be MySQL connection\n");
+    exit(1);
+  }
+
+  mysql_close((MYSQL *)args->value);
+
+  return NIL_ATOM;
 }
 

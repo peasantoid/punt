@@ -17,7 +17,7 @@
 
 #include "../../common.h"
 
-MFUNC_REPORT {
+/*MFUNC_REPORT {
   char **funcs = (char **)calloc(4, sizeof(char *));
 
   funcs[0] = "sfmt";
@@ -25,16 +25,24 @@ MFUNC_REPORT {
   funcs[2] = "srepl";
 
   return funcs;
-}
+}*/
+
+REPORT_MODULE("sfmt", "sfind", "srepl", NULL);
 
 MFUNC_PROTO(sfmt) {
   p_atom *rval = make_atom(P_STR, "", (void *)"");
+  p_num num;
 
   while(args) {
     if(args->type == P_STR) {
       asprintf((char **)&rval->value, "%s%s", (char *)rval->value, (char *)args->value);
     } else if(args->type == P_NUM) {
-      asprintf((char **)&rval->value, "%s%f", (char *)rval->value, *(p_num *)args->value);
+      num = *(p_num *)args->value;
+      if((int)num == num) {
+        asprintf((char **)&rval->value, "%s%d", (char *)rval->value, (int)num);
+      } else {
+        asprintf((char **)&rval->value, "%s%f", (char *)rval->value, num);
+      }
     } else if(args->type == P_NIL) {
       asprintf((char **)&rval->value, "%s(nil)", (char *)rval->value);
     } else {
