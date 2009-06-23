@@ -41,17 +41,7 @@ void seterr(p_atom **vars, MYSQL *conn) {
 
 MFUNC_PROTO(mysql_connect) {
   check_argc("mysql_connect", 5, args);
-
-  static int i;
-  for(i = 0; i < 4; i++) {
-    if(atom_getindex(args, i)->type != P_STR) {
-      func_err("mysql_connect", vafmt("arg %d must be string", i + 1));
-    }
-  }
-  if(atom_getindex(args, 4)->type != P_NUM) {
-    fprintf(stderr, "mysql_connect: arg 5 must be number\n");
-    exit(1);
-  }
+  check_argt("mysql_connect", args, P_STR, P_STR, P_STR, P_STR, P_NUM, 0);
   
   MYSQL *rval = mysql_init(NULL);
   if(!mysql_real_connect(
@@ -72,13 +62,8 @@ MFUNC_PROTO(mysql_connect) {
 
 MFUNC_PROTO(mysql_query) {
   check_argc("mysql_query", 2, args);
-  if(args->type != P_MYSQL) {
-    fprintf(stderr, "mysql_query: arg 1 must be MySQL connection\n");
-    exit(1);
-  } else if(atom_getindex(args, 1)->type != P_STR) {
-    fprintf(stderr, "mysql_query: arg 2 must be string\n");
-    exit(1);
-  }
+  check_argt("mysql_query", args, P_MYSQL, P_STR, 0);
+
   MYSQL *conn = (MYSQL *)args->value;
   char *qstr = (char *)atom_getindex(args, 1)->value;
 

@@ -73,3 +73,29 @@ void check_argc(const char *func, const int minlen, p_atom *args) {
   }
 }
 
+void check_argt(const char *func, p_atom *args, ...) {
+  va_list ap;
+  static p_type type;
+    type = 0;
+  static size_t i;
+    i = 0;
+
+  va_start(ap, args);
+  while(1) {
+    type = va_arg(ap, p_type);
+    if(!type) { break; }
+    
+    if(args->type != type) {
+      /*
+       * Yeah, I know it doesn't tell you what the correct type is.
+       * Suck it up.
+       */
+      func_err(func, vafmt("incorrect type for argument %ld", i));
+    }
+
+    ATOM_NEXT(args);
+    i++;
+  }
+  va_end(ap);
+}
+

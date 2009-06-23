@@ -43,9 +43,11 @@
 #define PT_QUOTE str_hash("_quote")
 #define PT_EXP str_hash("_exp")
 
+typedef unsigned long p_type;
+
 /* serves as just about everything */
 typedef struct {
-  unsigned long type;
+  p_type type;
 
   char *name;
   void *value;
@@ -81,7 +83,6 @@ p_atom *tokenize_str(const char *);
 p_atom *parse_tokens(p_atom *);
 void run_code(p_atom *, p_atom **);
 p_atom *run_exp(p_atom *, p_atom **);
-void check_argc(const char *, const int, p_atom *);
 p_atom *resolve_symbol(p_atom *, const char *);
 int load_module(const char *, p_atom **);
 
@@ -102,6 +103,8 @@ void register_builtins(p_atom **);
  */
 char **_report_module(const void *, ...);
 void func_err(const char *, const char *);
+void check_argc(const char *, const int, p_atom *);
+void check_argt(const char *, p_atom *, ...);
 
 #endif
 

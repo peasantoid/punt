@@ -47,6 +47,7 @@ MFUNC_PROTO(stdin) {
 
 MFUNC_PROTO(fopen) {
   check_argc("fopen", 2, args);
+
   return NIL_ATOM;
 }
 
