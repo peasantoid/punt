@@ -29,6 +29,11 @@
 #include <dlfcn.h>
 #include <libgen.h>
 
+/*
+ * FIXME: all these str_hash() calls are a performance hit -- need
+ * some way of avoiding this
+ */
+
 #define P_NIL str_hash("nil")
 #define P_NUM str_hash("num")
 #define P_STR str_hash("str")
