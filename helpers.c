@@ -60,14 +60,14 @@ void check_argc(const char *func, const int minlen, p_atom *args) {
   if(minlen >= 0) {
     if(atom_len(args) != minlen) {
       func_err(func, vafmt("exactly %d %s required, %d given", minlen,
-          minlen == 1 ? "arg" : "args", atom_len(args)));
+          minlen == 1 ? "argument" : "arguments", atom_len(args)));
       exit(1);
     }
   /* must be at least minlen args */
   } else {
     if(atom_len(args) < abs(minlen)) {
       func_err(func, vafmt("at least %d %s required, %d given", abs(minlen),
-          minlen == -1 ? "arg" : "args", atom_len(args)));
+          minlen == -1 ? "argument" : "arguments", atom_len(args)));
       exit(1);
     }
   }
@@ -90,7 +90,7 @@ void check_argt(const char *func, p_atom *args, ...) {
        * Yeah, I know it doesn't tell you what the correct type is.
        * Suck it up.
        */
-      func_err(func, vafmt("incorrect type for argument %ld", i));
+      func_err(func, vafmt("incorrect type for argument %ld", i + 1));
     }
 
     ATOM_NEXT(args);

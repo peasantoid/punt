@@ -34,6 +34,10 @@ REPORT_MODULE("mysql_connect",
               "mysql_close",
               NULL);
 
+MODULE_INIT {
+  errstr = "";
+}
+
 void seterr(p_atom **vars, MYSQL *conn) {
   errstr = (char *)mysql_error(conn);
   atom_setname(vars, make_atom(P_STR, "__mysql_errstr", (void *)mysql_error(conn)));
@@ -78,15 +82,13 @@ MFUNC_PROTO(mysql_query) {
 }
 
 MFUNC_PROTO(mysql_error) {
+  check_argc("mysql_error", 0, args);
   return make_atom(P_STR, "", (void *)errstr);
 }
 
 MFUNC_PROTO(mysql_fetch_row) {
   check_argc("mysql_fetch_row", 1, args);
-  if(args->type != P_MYSQL_RES) {
-    fprintf(stderr, "mysql_fetch_row: arg 1 must be MySQL result\n");
-    exit(1);
-  }
+  check_argt("mysql_fetch_row", args, P_MYSQL_RES, 0);
 
   MYSQL_ROW row = mysql_fetch_row((MYSQL_RES *)args->value);
   if(!row) {
@@ -97,13 +99,7 @@ MFUNC_PROTO(mysql_fetch_row) {
 
 MFUNC_PROTO(mysql_field) {
   check_argc("mysql_field", 2, args);
-  if(args->type != P_MYSQL_ROW) {
-    fprintf(stderr, "mysql_field: arg 1 must be MySQL row\n");
-    exit(1);
-  } else if(atom_getindex(args, 1)->type != P_NUM) {
-    fprintf(stderr, "mysql_field: arg 2 must be number\n");
-    exit(1);
-  }
+  check_argt("mysql_field", args, P_MYSQL_ROW, P_NUM, 0);
 
   char *field = ((MYSQL_ROW)args->value)
         [(int)*(p_num *)atom_getindex(args, 1)->value];
@@ -112,13 +108,7 @@ MFUNC_PROTO(mysql_field) {
 
 MFUNC_PROTO(mysql_escape) {
   check_argc("mysql_escape", 2, args);
-  if(args->type != P_MYSQL) {
-    fprintf(stderr, "mysql_escape: arg 1 must be MySQL connection\n");
-    exit(1);
-  } else if(atom_getindex(args, 1)->type != P_STR) {
-    fprintf(stderr, "mysql_escape: arg 2 must be string\n");
-    exit(1);
-  }
+  check_argt("mysql_escape", args, P_MYSQL, P_STR, 0);
 
   /*
    * FIXME: basically defeats the purpose of passing the query
@@ -134,10 +124,7 @@ MFUNC_PROTO(mysql_escape) {
 
 MFUNC_PROTO(mysql_free_result) {
   check_argc("mysql_free_result", 1, args);
-  if(args->type != P_MYSQL_RES) {
-    fprintf(stderr, "mysql_free_result: arg 1 must be MySQL result\n");
-    exit(1);
-  }
+  check_argt("mysql_free_result", args, P_MYSQL_RES, 0);
 
   mysql_free_result((MYSQL_RES *)args->value);
 
@@ -146,10 +133,7 @@ MFUNC_PROTO(mysql_free_result) {
 
 MFUNC_PROTO(mysql_close) {
   check_argc("mysql_close", 1, args);
-  if(args->type != P_MYSQL) {
-    fprintf(stderr, "mysql_close: arg 1 must be MySQL connection\n");
-    exit(1);
-  }
+  check_argt("mysql_close", args, P_MYSQL, 0);
 
   mysql_close((MYSQL *)args->value);
 

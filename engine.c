@@ -182,7 +182,7 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
 }
 
 int load_module(const char *path, p_atom **vars) {
-  void *module;
+  void *module, (*initptr)(void);
   char **(*namesptr)(void), **names;
   p_atom *(*funcptr)(p_atom *, p_atom **);
   
@@ -200,6 +200,14 @@ int load_module(const char *path, p_atom **vars) {
 
     names++;
   }
+
+  /* call the module's init function, if any */
+  initptr = dlsym(module, "_punt_init");
+  if(initptr) {
+    (*initptr)();
+  }
+
+  /* do not dlclose() -- it frees our function pointers */
 
   return 1;
 }
