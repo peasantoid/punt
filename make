@@ -82,7 +82,7 @@ make_dismod() {
 make_help() {
   cat <<EOF
 ./make [action] [args]
-  default: build interpreter and modules
+  (default)          -- build interpreter and modules
   ./make clean       -- remove build products
   ./make install     -- install everything
   ./make punt        -- build punt interpreter
