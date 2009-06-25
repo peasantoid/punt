@@ -73,6 +73,11 @@ void check_argc(const char *func, const int minlen, p_atom *args) {
   }
 }
 
+/*
+ * check argument types (primitive)
+ *
+ * 0 to end list
+ */
 void check_argt(const char *func, p_atom *args, ...) {
   va_list ap;
   static p_type type;
@@ -90,12 +95,43 @@ void check_argt(const char *func, p_atom *args, ...) {
        * Yeah, I know it doesn't tell you what the correct type is.
        * Suck it up.
        */
-      func_err(func, vafmt("incorrect type for argument %ld:%ld=%ld?%d", i + 1, type, args->type, args->type == type));
+      func_err(func, vafmt("incorrect type for argument %ld", i + 1));
     }
 
     ATOM_NEXT(args);
     i++;
   }
   va_end(ap);
+}
+
+/*
+ * check argument types (user-defined)
+ *
+ * "" to skip, NULL to end list
+ */
+void check_argu(const char *func, p_atom *args, ...) {
+  va_list ap;
+  static char *type;
+    type = "";
+  static size_t i;
+    i = 0;
+
+  va_start(ap, args);
+  while(1) {
+    type = va_arg(ap, char *);
+    /*
+     * order of these two is very important, as strlen() segfaults
+     * if NULL
+     */
+    if(!type) { break; }
+    else if(strlen(type) == 0) { continue; }
+
+    if(args->type != P_UTYPE || strcmp(UTYPE(args)->type, type)) {
+      func_err(func, vafmt("incorrect type for argument %ld", i + 1));
+    }
+
+    ATOM_NEXT(args);
+    i++;
+  }
 }
 

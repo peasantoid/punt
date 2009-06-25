@@ -28,20 +28,14 @@ REPORT_MODULE("mysql_connect",
               "mysql_close",
               NULL);
 
-p_type P_MYSQL, P_MYSQL_ROW, P_MYSQL_RES;
 char *errstr;
 
 MODULE_INIT {
-  P_MYSQL = str_hash("mysql");
-  P_MYSQL_ROW = str_hash("mysql_row");
-  P_MYSQL_RES = str_hash("mysql_res");
-
   errstr = "";
 }
 
 void seterr(p_atom **vars, MYSQL *conn) {
   errstr = (char *)mysql_error(conn);
-  atom_setname(vars, make_atom(P_STR, "__mysql_errstr", (void *)mysql_error(conn)));
 }
 
 MFUNC_PROTO(mysql_connect) {

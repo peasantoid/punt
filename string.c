@@ -68,23 +68,3 @@ char *str_replace(const char *target, const char *search, const char *replace,
   return result;
 }
 
-/*
- * calculate hash of a string
- *
- * This hash function is very weak, but for the purpose of uniquely
- * identifying types, we don't really need anything stronger.
- */
-unsigned long str_hash(const char *str) {
-  static unsigned long hash;
-    hash = P_TYPE_HIGHEST + 1; /* don't want to conflict */
-  static int c, i;
-    i = 11; /* stick a random number here */
-
-  while((c = *(str++)) != '\0') {
-    hash += c ^ i;
-    i++;
-  }
-
-  return hash;
-}
-

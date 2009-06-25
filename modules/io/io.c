@@ -27,12 +27,9 @@ REPORT_MODULE("stdout",
               "io_error",
               NULL);
 
-p_type P_FILE;
 char *errstr;
 
 MODULE_INIT {
-  P_FILE = str_hash("file");
-
   /* don't want a dangling pointer */
   errstr = "";
 }
@@ -42,15 +39,15 @@ void seterr(p_atom **vars, const int err) {
 }
 
 MFUNC_PROTO(stdout) {
-  return make_atom(P_FILE, "", (void *)stdout);
+  return make_atom(P_UTYPE, "", make_utype("file", (void *)stdout));
 }
 
 MFUNC_PROTO(stderr) {
-  return make_atom(P_FILE, "", (void *)stderr);
+  return make_atom(P_UTYPE, "", make_utype("file", (void *)stderr));
 }
 
 MFUNC_PROTO(stdin) {
-  return make_atom(P_FILE, "", (void *)stdin);
+  return make_atom(P_UTYPE, "", make_utype("file", (void *)stdin));
 }
 
 MFUNC_PROTO(fopen) {
@@ -66,14 +63,15 @@ MFUNC_PROTO(fopen) {
     return NIL_ATOM;
   }
 
-  return make_atom(P_FILE, "", (void *)fp);
+  return make_atom(P_UTYPE, "", make_utype("file", (void *)fp));
 }
 
 MFUNC_PROTO(fclose) {
   check_argc("fclose", 1, args);
-  check_argt("fclose", args, P_FILE, 0);
+  check_argt("fclose", args, P_UTYPE, 0);
+  check_argu("fclose", args, "file", NULL);
 
-  if(fclose((FILE *)args->value) == EOF) {
+  if(fclose((FILE *)UTYPE(args)->value) == EOF) {
     seterr(vars, errno);
     return NIL_ATOM;
   }
@@ -83,14 +81,16 @@ MFUNC_PROTO(fclose) {
 
 MFUNC_PROTO(fget) {
   check_argc("fget", 2, args);
-  check_argt("fget", args, P_FILE, P_NUM, 0);
+  check_argt("fget", args, P_UTYPE, P_NUM, 0);
+  check_argu("fget", args, "file", "", NULL);
+
   static char *read, *data;
     read = NULL;
     data = "";
   static long readlen;
     readlen = (long)*(p_num *)atom_getindex(args, 1)->value;
   const int blocksize = 4096;
-  FILE *fp = (FILE *)args->value;
+  FILE *fp = (FILE *)UTYPE(args)->value;
 
   if(readlen <= 0) {
     while(!feof(fp)) {
@@ -112,10 +112,13 @@ MFUNC_PROTO(fget) {
 
 MFUNC_PROTO(fput) {
   check_argc("fput", 2, args);
-  check_argt("fput", args, P_FILE, P_STR, 0);
+  check_argt("fput", args, P_UTYPE, P_STR, 0);
+  check_argu("fput", args, "file", "", NULL);
+
+  FILE *fp = (FILE *)UTYPE(args)->value;
   
-  if(fputs((char *)atom_getindex(args, 1)->value, (FILE *)args->value) == EOF ||
-      fflush((FILE *)args->value) == EOF) {
+  if(fputs((char *)atom_getindex(args, 1)->value, fp) == EOF ||
+      fflush(fp) == EOF) {
     seterr(vars, errno);
     return NIL_ATOM;
   }

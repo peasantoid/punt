@@ -113,3 +113,11 @@ int atom_true(p_atom *atom) {
   return (int)(atom->type != P_NIL);
 }
 
+/* create a p_utype* and return as void* */
+void *make_utype(const char *type, void *value) {
+  p_utype *rval = (p_utype *)calloc(1, sizeof(p_utype));
+    rval->type = strdup(type);
+    rval->value = value;
+  return (void *)rval;
+}
+

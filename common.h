@@ -29,24 +29,23 @@
 #include <dlfcn.h>
 #include <libgen.h>
 
-/* 0 is for marking the end of various things */
-#define P_NIL 1
-#define P_NUM 2
-#define P_STR 3
-#define P_SYM 4
-#define P_BLOCK 5
-#define P_MFUNC 6
-#define P_FUNC 7
+typedef enum {
+  /* 0 is used to mark end of check_argt() list */
+  P_NIL = 1,
+  P_NUM,
+  P_STR,
+  P_SYM,
+  P_BLOCK,
+  P_MFUNC,
+  P_FUNC,
+  P_UTYPE,
 
-#define PT_PARENL 8
-#define PT_PARENR 9
-#define PT_LITSYM 10
-#define PT_QUOTE 11
-#define PT_EXP 12
-
-#define P_TYPE_HIGHEST 12
-
-typedef unsigned long p_type;
+  PT_PARENL,
+  PT_PARENR,
+  PT_LITSYM,
+  PT_QUOTE,
+  PT_EXP
+} p_type;
 
 /* serves as just about everything */
 typedef struct {
@@ -57,6 +56,12 @@ typedef struct {
 
   struct p_atom *next;
 } p_atom;
+
+/* non-primitive type */
+typedef struct {
+  char *type;
+  void *value;
+} p_utype;
 
 typedef double p_num;
 
@@ -75,9 +80,11 @@ p_atom *atom_getname(p_atom *, const char *);
 p_atom *atom_dup(p_atom *);
 void atom_setname(p_atom **, p_atom *);
 int atom_true(p_atom *);
+void *make_utype(const char *, void *);
 #define NIL_ATOM make_atom(P_NIL, "", NULL)
 #define TRUE_ATOM make_atom(P_NUM, "", atom_dupnum(1))
-#define ATOM_NEXT(a) a = (p_atom *)a->next
+#define ATOM_NEXT(a) ((a) = (p_atom *)(a)->next)
+#define UTYPE(a) ((p_utype *)((a)->value))
 
 /* tokenizer.c */
 p_atom *tokenize_fp(FILE *);
@@ -94,13 +101,14 @@ int load_module(const char *, p_atom **);
 char *vafmt(const char *, ...);
 int str_pos(const char *, const char *, unsigned int);
 char *str_replace(const char *, const char *, const char *, unsigned int);
-unsigned long str_hash(const char *);
 
 /* builtins.c */
 void register_builtins(p_atom **);
 
 /* helpers.c */
-#define REPORT_MODULE(...) char **_punt_report_funcs(void) { return _report_module(NULL, __VA_ARGS__); }
+#define REPORT_MODULE(...) char **_punt_report_funcs(void) { \
+    return _report_module(NULL, __VA_ARGS__); \
+  }
 /*
  * we need a fixed argument because stdarg.h doesn't support functions
  * without them
@@ -109,6 +117,7 @@ char **_report_module(const void *, ...);
 void func_err(const char *, const char *);
 void check_argc(const char *, const int, p_atom *);
 void check_argt(const char *, p_atom *, ...);
+void check_argu(const char *, p_atom *, ...);
 
 #endif
 
