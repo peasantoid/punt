@@ -17,8 +17,6 @@
 
 #include "../../common.h"
 
-#define P_FILE str_hash("file")
-
 REPORT_MODULE("stdout",
               "stderr",
               "stdin",
@@ -29,10 +27,13 @@ REPORT_MODULE("stdout",
               "io_error",
               NULL);
 
+p_type P_FILE;
 char *errstr;
 
-/* don't want any dangling pointers */
 MODULE_INIT {
+  P_FILE = str_hash("file");
+
+  /* don't want a dangling pointer */
   errstr = "";
 }
 

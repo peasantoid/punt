@@ -18,7 +18,7 @@
 #include "common.h"
 
 /* create an atom */
-p_atom *make_atom(unsigned long type, const char *name, void *value) {
+p_atom *make_atom(p_type type, const char *name, void *value) {
   p_atom *atom = (p_atom *)calloc(1, sizeof(p_atom));
     atom->type = type;
     atom->name = strdup(name);

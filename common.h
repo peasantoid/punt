@@ -29,21 +29,22 @@
 #include <dlfcn.h>
 #include <libgen.h>
 
-/* FIXME: all these str_hash() calls are a performance hit */
+/* 0 is for marking the end of various things */
+#define P_NIL 1
+#define P_NUM 2
+#define P_STR 3
+#define P_SYM 4
+#define P_BLOCK 5
+#define P_MFUNC 6
+#define P_FUNC 7
 
-#define P_NIL str_hash("nil")
-#define P_NUM str_hash("num")
-#define P_STR str_hash("str")
-#define P_SYM str_hash("sym")
-#define P_BLOCK str_hash("block")
-#define P_MFUNC str_hash("mfunc")
-#define P_FUNC str_hash("func")
+#define PT_PARENL 8
+#define PT_PARENR 9
+#define PT_LITSYM 10
+#define PT_QUOTE 11
+#define PT_EXP 12
 
-#define PT_PARENL str_hash("_parenl")
-#define PT_PARENR str_hash("_parenr")
-#define PT_LITSYM str_hash("_litsym")
-#define PT_QUOTE str_hash("_quote")
-#define PT_EXP str_hash("_exp")
+#define P_TYPE_HIGHEST 12
 
 typedef unsigned long p_type;
 
@@ -64,7 +65,7 @@ typedef double p_num;
 #define MFUNC_PROTO(f) p_atom *punt_##f(p_atom *args, p_atom **vars)
 
 /* atom.c */
-p_atom *make_atom(unsigned long, const char *, void *);
+p_atom *make_atom(p_type, const char *, void *);
 p_atom *atom_tail(p_atom *);
 void atom_append(p_atom **, p_atom *);
 p_atom *atom_getindex(p_atom *, unsigned int);

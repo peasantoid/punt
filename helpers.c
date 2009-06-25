@@ -83,14 +83,14 @@ void check_argt(const char *func, p_atom *args, ...) {
   va_start(ap, args);
   while(1) {
     type = va_arg(ap, p_type);
-    if(!type) { break; }
+    if(type == 0) { break; }
     
     if(args->type != type) {
       /*
        * Yeah, I know it doesn't tell you what the correct type is.
        * Suck it up.
        */
-      func_err(func, vafmt("incorrect type for argument %ld", i + 1));
+      func_err(func, vafmt("incorrect type for argument %ld:%ld=%ld?%d", i + 1, type, args->type, args->type == type));
     }
 
     ATOM_NEXT(args);

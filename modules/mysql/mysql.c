@@ -18,12 +18,6 @@
 #include "../../common.h"
 #include <mysql.h>
 
-#define P_MYSQL str_hash("mysql")
-#define P_MYSQL_RES str_hash("mysql_res")
-#define P_MYSQL_ROW str_hash("mysql_row")
-
-char *errstr;
-
 REPORT_MODULE("mysql_connect",
               "mysql_query",
               "mysql_error",
@@ -34,7 +28,14 @@ REPORT_MODULE("mysql_connect",
               "mysql_close",
               NULL);
 
+p_type P_MYSQL, P_MYSQL_ROW, P_MYSQL_RES;
+char *errstr;
+
 MODULE_INIT {
+  P_MYSQL = str_hash("mysql");
+  P_MYSQL_ROW = str_hash("mysql_row");
+  P_MYSQL_RES = str_hash("mysql_res");
+
   errstr = "";
 }
 
