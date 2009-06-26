@@ -40,7 +40,7 @@ p_atom *tokenize_fp(FILE *fp) {
 /* tokenizes a string */
 p_atom *tokenize_str(const char *str) {
   p_atom *tokens = NULL;
-  static unsigned int i, bsc;
+  static size_t i, bsc, level;
   char *strv;
 
   for(i = 0; i < strlen(str); i++) {
@@ -49,7 +49,11 @@ p_atom *tokenize_str(const char *str) {
         for(; str[i] != '\n' && i < strlen(str); i++);
         break;
       case '[':
-        for(; str[i] != ']' && i < strlen(str); i++);
+        for(i++, level = 1; i < strlen(str); i++) {
+          if(str[i] == '[') { level++; }
+          else if(str[i] == ']') { level--; }
+          if(level <= 0) { break; }
+        }
         break;
       case '(':
         atom_append(&tokens, make_atom(PT_PARENL, "", NULL));
