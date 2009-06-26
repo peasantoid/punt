@@ -29,6 +29,7 @@
 #include <dlfcn.h>
 #include <libgen.h>
 
+/* primitive types */
 typedef enum {
   /* 0 is used to mark end of check_argt() list */
   P_NIL = 1,
@@ -118,6 +119,7 @@ void func_err(const char *, const char *);
 void check_argc(const char *, const int, p_atom *);
 void check_argt(const char *, p_atom *, ...);
 void check_argu(const char *, p_atom *, ...);
+char *prim_type_name(p_type);
 
 #endif
 

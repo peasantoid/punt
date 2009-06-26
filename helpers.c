@@ -91,11 +91,7 @@ void check_argt(const char *func, p_atom *args, ...) {
     if(type == 0) { break; }
     
     if(args->type != type) {
-      /*
-       * Yeah, I know it doesn't tell you what the correct type is.
-       * Suck it up.
-       */
-      func_err(func, vafmt("incorrect type for argument %ld", i + 1));
+      func_err(func, vafmt("incorrect type for argument %ld: %s", i + 1, prim_type_name(args->type)));
     }
 
     ATOM_NEXT(args);
@@ -127,11 +123,41 @@ void check_argu(const char *func, p_atom *args, ...) {
     else if(strlen(type) == 0) { continue; }
 
     if(args->type != P_UTYPE || strcmp(UTYPE(args)->type, type)) {
-      func_err(func, vafmt("incorrect type for argument %ld", i + 1));
+      func_err(func, vafmt("incorrect type for argument %ld: %s", i + 1, UTYPE(args)->type));
     }
 
     ATOM_NEXT(args);
     i++;
+  }
+}
+
+/* get primitive type name */
+char *prim_type_name(p_type type) {
+  switch(type) {
+    case P_NIL:
+      return "nil";
+      break;
+    case P_NUM:
+      return "number";
+      break;
+    case P_STR:
+      return "string";
+      break;
+    case P_SYM:
+      return "symbol";
+      break;
+    case P_BLOCK:
+      return "block";
+      break;
+    case P_MFUNC:
+      return "module_function";
+      break;
+    case P_FUNC:
+      return "function";
+      break;
+    default:
+      return "(undefined)";
+      break;
   }
 }
 

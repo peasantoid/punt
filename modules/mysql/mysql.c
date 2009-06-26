@@ -56,14 +56,15 @@ MFUNC_PROTO(mysql_connect) {
     return NIL_ATOM;
   }
 
-  return make_atom(P_MYSQL, "", (void *)rval);
+  return make_atom(P_UTYPE, "", make_utype("mysql", (void *)rval));
 }
 
 MFUNC_PROTO(mysql_query) {
   check_argc("mysql_query", 2, args);
-  check_argt("mysql_query", args, P_MYSQL, P_STR, 0);
+  check_argt("mysql_query", args, P_UTYPE, P_STR, 0);
+  check_argu("mysql_query", args, "mysql", "", NULL);
 
-  MYSQL *conn = (MYSQL *)args->value;
+  MYSQL *conn = (MYSQL *)UTYPE(args)->value;
   char *qstr = (char *)atom_getindex(args, 1)->value;
 
   if(mysql_query(conn, qstr)) {
@@ -73,7 +74,7 @@ MFUNC_PROTO(mysql_query) {
 
   MYSQL_RES *res = mysql_use_result(conn);
 
-  return make_atom(P_MYSQL_RES, "", (void *)res);
+  return make_atom(P_UTYPE, "", make_utype("mysql_res", (void *)res));
 }
 
 MFUNC_PROTO(mysql_error) {
@@ -83,27 +84,29 @@ MFUNC_PROTO(mysql_error) {
 
 MFUNC_PROTO(mysql_fetch_row) {
   check_argc("mysql_fetch_row", 1, args);
-  check_argt("mysql_fetch_row", args, P_MYSQL_RES, 0);
+  check_argu("mysql_fetch_row", args, "mysql_res", NULL);
 
-  MYSQL_ROW row = mysql_fetch_row((MYSQL_RES *)args->value);
+  MYSQL_ROW row = mysql_fetch_row((MYSQL_RES *)UTYPE(args)->value);
   if(!row) {
     return NIL_ATOM;
   }
-  return make_atom(P_MYSQL_ROW, "", (void *)row);
+  return make_atom(P_UTYPE, "", make_utype("mysql_row", (void *)row));
 }
 
 MFUNC_PROTO(mysql_field) {
   check_argc("mysql_field", 2, args);
-  check_argt("mysql_field", args, P_MYSQL_ROW, P_NUM, 0);
+  check_argt("mysql_field", args, P_UTYPE, P_NUM, 0);
+  check_argu("mysql_field", args, "mysql_row", "", NULL);
 
-  char *field = ((MYSQL_ROW)args->value)
+  char *field = ((MYSQL_ROW)UTYPE(args)->value)
         [(int)*(p_num *)atom_getindex(args, 1)->value];
   return make_atom(P_STR, "", (void *)field);
 }
 
 MFUNC_PROTO(mysql_escape) {
   check_argc("mysql_escape", 2, args);
-  check_argt("mysql_escape", args, P_MYSQL, P_STR, 0);
+  check_argt("mysql_escape", args, P_UTYPE, P_STR, 0);
+  check_argu("mysql_escape", args, "mysql", "", NULL);
 
   /*
    * FIXME: basically defeats the purpose of passing the query
@@ -112,25 +115,26 @@ MFUNC_PROTO(mysql_escape) {
   char *from = (char *)atom_getindex(args, 1)->value;
   int len = strlen(from);
   char *to = (char *)calloc((len * 2) + 1, sizeof(char));
-  mysql_real_escape_string((MYSQL *)args->value, to, from, len);
+  mysql_real_escape_string((MYSQL *)UTYPE(args)->value, to, from, len);
 
   return make_atom(P_STR, "", (void *)to);
 }
 
 MFUNC_PROTO(mysql_free_result) {
   check_argc("mysql_free_result", 1, args);
-  check_argt("mysql_free_result", args, P_MYSQL_RES, 0);
+  check_argt("mysql_free_result", args, P_UTYPE, 0);
+  check_argu("mysql_free_result", args, "mysql_res", NULL);
 
-  mysql_free_result((MYSQL_RES *)args->value);
+  mysql_free_result((MYSQL_RES *)UTYPE(args)->value);
 
   return NIL_ATOM;
 }
 
 MFUNC_PROTO(mysql_close) {
   check_argc("mysql_close", 1, args);
-  check_argt("mysql_close", args, P_MYSQL, 0);
+  check_argu("mysql_close", args, "mysql", NULL);
 
-  mysql_close((MYSQL *)args->value);
+  mysql_close((MYSQL *)UTYPE(args)->value);
 
   return NIL_ATOM;
 }
