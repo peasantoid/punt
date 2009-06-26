@@ -46,7 +46,10 @@ p_atom *tokenize_str(const char *str) {
   for(i = 0; i < strlen(str); i++) {
     switch(str[i]) {
       case '#':
-        for(; str[i] != '\n'; i++);
+        for(; str[i] != '\n' && i < strlen(str); i++);
+        break;
+      case '[':
+        for(; str[i] != ']' && i < strlen(str); i++);
         break;
       case '(':
         atom_append(&tokens, make_atom(PT_PARENL, "", NULL));
