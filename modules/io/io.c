@@ -34,7 +34,7 @@ MODULE_INIT {
   errstr = "";
 }
 
-void seterr(p_atom **vars, const int err) {
+void seterr(const int err) {
   errstr = strerror(err);
 }
 
@@ -59,7 +59,7 @@ MFUNC_PROTO(fopen) {
   FILE *fp = fopen(path, mode);
 
   if(!fp) {
-    seterr(vars, errno);
+    seterr(errno);
     return NIL_ATOM;
   }
 
@@ -72,7 +72,7 @@ MFUNC_PROTO(fclose) {
   check_argu("fclose", args, "file", NULL);
 
   if(fclose((FILE *)UTYPE(args)->value) == EOF) {
-    seterr(vars, errno);
+    seterr(errno);
     return NIL_ATOM;
   }
 
@@ -96,7 +96,10 @@ MFUNC_PROTO(fget) {
     while(!feof(fp)) {
       read = (char *)calloc(blocksize + 1, sizeof(char));
 
-      fgets(read, blocksize, fp);
+      if(!fgets(read, blocksize, fp)) {
+        seterr(errno);
+        return NIL_ATOM;
+      }
       asprintf(&data, "%s%s", data, read);
 
       free(read);
@@ -104,7 +107,10 @@ MFUNC_PROTO(fget) {
   } else {
     data = (char *)calloc(readlen + 2, sizeof(char));
 
-    fgets(data, readlen + 1, fp);
+    if(!fgets(data, readlen + 1, fp)) {
+      seterr(errno);
+      return NIL_ATOM;
+    }
   }
 
   return make_atom(P_STR, "", (void *)data);
@@ -119,7 +125,7 @@ MFUNC_PROTO(fput) {
   
   if(fputs((char *)atom_getindex(args, 1)->value, fp) == EOF ||
       fflush(fp) == EOF) {
-    seterr(vars, errno);
+    seterr(errno);
     return NIL_ATOM;
   }
 

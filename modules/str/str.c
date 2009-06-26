@@ -17,17 +17,10 @@
 
 #include "../../common.h"
 
-/*MFUNC_REPORT {
-  char **funcs = (char **)calloc(4, sizeof(char *));
-
-  funcs[0] = "sfmt";
-  funcs[1] = "sfind";
-  funcs[2] = "srepl";
-
-  return funcs;
-}*/
-
-REPORT_MODULE("sfmt", "sfind", "srepl", NULL);
+REPORT_MODULE("sfmt",
+              "sfind",
+              "srepl",
+              NULL);
 
 MFUNC_PROTO(sfmt) {
   p_atom *rval = make_atom(P_STR, "", (void *)"");

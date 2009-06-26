@@ -35,6 +35,7 @@ typedef enum {
   P_NIL = 1,
   P_NUM,
   P_STR,
+  P_LIST,
   P_SYM,
   P_BLOCK,
   P_MFUNC,

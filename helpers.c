@@ -91,7 +91,8 @@ void check_argt(const char *func, p_atom *args, ...) {
     if(type == 0) { break; }
     
     if(args->type != type) {
-      func_err(func, vafmt("incorrect type for argument %ld: %s", i + 1, prim_type_name(args->type)));
+      func_err(func, vafmt("incorrect type '%s' for argument %ld (should be '%s')", 
+            prim_type_name(args->type), i + 1, prim_type_name(type)));
     }
 
     ATOM_NEXT(args);
@@ -123,7 +124,8 @@ void check_argu(const char *func, p_atom *args, ...) {
     else if(strlen(type) == 0) { continue; }
 
     if(args->type != P_UTYPE || strcmp(UTYPE(args)->type, type)) {
-      func_err(func, vafmt("incorrect type for argument %ld: %s", i + 1, UTYPE(args)->type));
+      func_err(func, vafmt("incorrect type '%s' for argument %ld (should be '%s')",
+            UTYPE(args)->type, i + 1, type));
     }
 
     ATOM_NEXT(args);
@@ -143,6 +145,9 @@ char *prim_type_name(p_type type) {
     case P_STR:
       return "string";
       break;
+    case P_LIST:
+      return "list";
+      break;
     case P_SYM:
       return "symbol";
       break;
@@ -154,6 +159,9 @@ char *prim_type_name(p_type type) {
       break;
     case P_FUNC:
       return "function";
+      break;
+    case P_UTYPE:
+      return "custom";
       break;
     default:
       return "(undefined)";
