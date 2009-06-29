@@ -16,7 +16,7 @@
  */
 
 #include "common.h"
-#define IS_SYMBOL_CHAR(c) (isalnum(c) || (!isspace(c) && !strchr(".()#'\"", c)))
+#define IS_SYMBOL_CHAR(c) (isalnum(c) || (!isspace(c) && !strchr(".()#'\"[]", c)))
 
 /* tokenizes the file pointed to by an open FILE* */
 p_atom *tokenize_fp(FILE *fp) {
@@ -97,6 +97,13 @@ p_atom *tokenize_str(const char *str) {
 
         atom_append(&tokens, make_atom(P_STR, "", (void *)strdup(strv)));
         free(strv);
+        break;
+      case '"':
+        strv = "";
+        for(i++; i < strlen(str) && str[i] != '"'; i++) {
+          asprintf(&strv, "%s%c", strv, str[i]);
+        }
+        atom_append(&tokens, make_atom(P_STR, "", (void *)strdup(strv)));
         break;
       default:
         /* it seems to be a number */

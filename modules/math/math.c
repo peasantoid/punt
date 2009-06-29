@@ -18,22 +18,16 @@
 #include "../../common.h"
 #include <math.h>
 
-char **_punt_report_funcs(void) {
-  char **funcs = (char **)calloc(10, sizeof(char *));
+REPORT_MODULE("add",
+              "sub",
+              "mul",
+              "div",
+              "mod",
+              "pow",
 
-  funcs[0] = "add";
-  funcs[1] = "sub";
-  funcs[2] = "mul";
-  funcs[3] = "div";
-  funcs[4] = "mod";
-  funcs[5] = "pow";
-
-  funcs[6] = "abs";
-  funcs[7] = "floor";
-  funcs[8] = "ceil";
-
-  return funcs;
-}
+              "abs",
+              "floor",
+              "ceil");
 
 void check_types(p_atom *args, char *func) {
   while(args) {
@@ -45,63 +39,63 @@ void check_types(p_atom *args, char *func) {
   }
 }
 
-p_atom *punt_add(p_atom *args, p_atom **vars) {
+MFUNC_PROTO(add) {
   check_argc("add", 2, args);
   check_types(args, "add");
   return make_atom(P_NUM, "", atom_dupnum(
         *(p_num *)args->value + *(p_num *)atom_getindex(args, 1)->value));
 }
 
-p_atom *punt_sub(p_atom *args, p_atom **vars) {
+MFUNC_PROTO(sub) {
   check_argc("sub", 2, args);
   check_types(args, "sub");
   return make_atom(P_NUM, "", atom_dupnum(
         *(p_num *)args->value - *(p_num *)atom_getindex(args, 1)->value));
 }
 
-p_atom *punt_mul(p_atom *args, p_atom **vars) {
+MFUNC_PROTO(mul) {
   check_argc("mul", 2, args);
   check_types(args, "mul");
   return make_atom(P_NUM, "", atom_dupnum(
         *(p_num *)args->value * *(p_num *)atom_getindex(args, 1)->value));
 }
 
-p_atom *punt_div(p_atom *args, p_atom **vars) {
+MFUNC_PROTO(div) {
   check_argc("div", 2, args);
   check_types(args, "div");
   return make_atom(P_NUM, "", atom_dupnum(
         *(p_num *)args->value / *(p_num *)atom_getindex(args, 1)->value));
 }
 
-p_atom *punt_mod(p_atom *args, p_atom **vars) {
+MFUNC_PROTO(mod) {
   check_argc("mod", 2, args);
   check_types(args, "mod");
   return make_atom(P_NUM, "", atom_dupnum(
         fmod(*(p_num *)args->value, *(p_num *)atom_getindex(args, 1)->value)));
 }
 
-p_atom *punt_pow(p_atom *args, p_atom **vars) {
+MFUNC_PROTO(pow) {
   check_argc("pow", 2, args);
   check_types(args, "pow");
   return make_atom(P_NUM, "", atom_dupnum(
         pow(*(p_num *)args->value, *(p_num *)atom_getindex(args, 1)->value)));
 }
 
-p_atom *punt_abs(p_atom *args, p_atom **vars) {
+MFUNC_PROTO(abs) {
   check_argc("abs", 1, args);
   check_types(args, "abs");
   return make_atom(P_NUM, "", atom_dupnum(
         fabs(*(p_num *)args->value)));
 }
 
-p_atom *punt_floor(p_atom *args, p_atom **vars) {
+MFUNC_PROTO(floor) {
   check_argc("floor", 1, args);
   check_types(args, "floor");
   return make_atom(P_NUM, "", atom_dupnum(
         floor(*(p_num *)args->value)));
 }
 
-p_atom *punt_ceil(p_atom *args, p_atom **vars) {
+MFUNC_PROTO(ceil) {
   check_argc("ceil", 1, args);
   check_types(args, "ceil");
   return make_atom(P_NUM, "", atom_dupnum(

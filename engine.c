@@ -133,7 +133,7 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
 
   if(func->type == P_SYM) {
     if(atom_len(args) != 1) {
-      fprintf(stderr, "exactly 1 arg required for assignment, %d given\n", atom_len(args));
+      fprintf(stderr, "exactly 1 argument required for assignment, %d given\n", atom_len(args));
       exit(1);
     }
     atom_setname(vars, make_atom(args->type, (char *)func->value, args->value));
