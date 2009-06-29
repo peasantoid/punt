@@ -43,4 +43,3 @@ p_atom *blt_use(p_atom *args, p_atom **vars) {
 void register_builtins(p_atom **vars) {
   atom_setname(vars, make_atom(P_MFUNC, "use", &blt_use));
 }
-

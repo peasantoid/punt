@@ -123,4 +123,3 @@ void check_argu(const char *, p_atom *, ...);
 char *prim_type_name(p_type);
 
 #endif
-

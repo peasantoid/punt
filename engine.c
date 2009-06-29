@@ -211,4 +211,3 @@ int load_module(const char *path, p_atom **vars) {
 
   return 1;
 }
-

@@ -20,7 +20,8 @@
 REPORT_MODULE("sfmt",
               "sfind",
               "srepl",
-              NULL);
+              "ord",
+              "chr");
 
 MFUNC_PROTO(sfmt) {
   p_atom *rval = make_atom(P_STR, "", (void *)"");
@@ -78,5 +79,19 @@ MFUNC_PROTO(srepl) {
   return make_atom(P_STR, "", str_replace(
           (char *)args->value, (char *)atom_getindex(args, 1)->value,
           (char *)atom_getindex(args, 2)->value, 0));
+}
+
+MFUNC_PROTO(ord) {
+  check_argc("ord", 1, args);
+  check_argt("ord", args, P_STR, 0);
+
+  return make_atom(P_NUM, "", atom_dupnum(*(char *)args->value));
+}
+
+MFUNC_PROTO(chr) {
+  check_argc("chr", 1, args);
+  check_argt("chr", args, P_NUM, 0);
+
+  return make_atom(P_STR, "", vafmt("%c", (char)*(p_num *)args->value));
 }
 
