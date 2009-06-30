@@ -21,7 +21,9 @@ REPORT_MODULE("sfmt",
               "sfind",
               "srepl",
               "ord",
-              "chr");
+              "chr",
+              "ssub",
+              "slen");
 
 MFUNC_PROTO(sfmt) {
   p_atom *rval = make_atom(P_STR, "", (void *)"");
@@ -93,5 +95,31 @@ MFUNC_PROTO(chr) {
   check_argt("chr", args, P_NUM, 0);
 
   return make_atom(P_STR, "", vafmt("%c", (char)*(p_num *)args->value));
+}
+
+MFUNC_PROTO(ssub) {
+  check_argc("ssub", 3, args);
+  check_argt("ssub", args, P_STR, P_NUM, P_NUM, 0);
+
+  static size_t start, len, i, count;
+    start = (size_t)*(p_num *)atom_getindex(args, 1)->value;
+    len = (size_t)*(p_num *)atom_getindex(args, 2)->value;
+  static char *str, *rval;
+    str = (char *)args->value;
+    rval = (char *)calloc(len + 1, sizeof(char));
+  for(i = start, count = 0;
+      i < strlen(str) && count < len;
+      i++, count++) {
+    rval[count] = str[i];
+  }
+
+  return make_atom(P_STR, "", (void *)rval);
+}
+
+MFUNC_PROTO(slen) {
+  check_argc("slen", 1, args);
+  check_argt("slen", args, P_STR, 0);
+
+  return make_atom(P_NUM, "", atom_dupnum(strlen((char *)args->value)));
 }
 
