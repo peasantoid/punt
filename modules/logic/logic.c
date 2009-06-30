@@ -17,18 +17,15 @@
 
 #include "../../common.h"
 
-MFUNC_REPORT {
-  char **funcs = (char **)calloc(6, sizeof(char *));
+REPORT_MODULE("not",
+              "and",
+              "or",
 
-  funcs[0] = "not";
-  funcs[1] = "and";
-  funcs[2] = "or";
-
-  funcs[3] = "yes";
-  funcs[4] = "no";
-
-  return funcs;
-}
+              "yes",
+              "no",
+              
+              "true",
+              "false");
 
 MFUNC_PROTO(not) {
   check_argc("not", 1, args);
@@ -58,5 +55,15 @@ MFUNC_PROTO(yes) {
 MFUNC_PROTO(no) {
   check_argc("no", 0, args);
   return NIL_ATOM;
+}
+
+MFUNC_PROTO(true) {
+  check_argc("true", 1, args);
+  return atom_true(args) ? TRUE_ATOM : NIL_ATOM;
+}
+
+MFUNC_PROTO(false) {
+  check_argc("false", 1, args);
+  return atom_true(args) ? NIL_ATOM : TRUE_ATOM;
 }
 

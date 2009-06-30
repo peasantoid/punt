@@ -102,8 +102,8 @@ MFUNC_PROTO(ssub) {
   check_argt("ssub", args, P_STR, P_NUM, P_NUM, 0);
 
   static size_t start, len, i, count;
-    start = (size_t)*(p_num *)atom_getindex(args, 1)->value;
-    len = (size_t)*(p_num *)atom_getindex(args, 2)->value;
+    start = (size_t)abs(*(p_num *)atom_getindex(args, 1)->value);
+    len = (size_t)abs(*(p_num *)atom_getindex(args, 2)->value);
   static char *str, *rval;
     str = (char *)args->value;
     rval = (char *)calloc(len + 1, sizeof(char));
