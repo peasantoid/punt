@@ -62,8 +62,3 @@ MFUNC_PROTO(true) {
   return atom_true(args) ? TRUE_ATOM : NIL_ATOM;
 }
 
-MFUNC_PROTO(false) {
-  check_argc("false", 1, args);
-  return atom_true(args) ? NIL_ATOM : TRUE_ATOM;
-}
-
