@@ -24,8 +24,8 @@ REPORT_MODULE("stdout",
               "fclose",
               "fget",
               "fput",
-              "io_error",
-              NULL);
+              "feof",
+              "io_error");
 
 char *errstr;
 
@@ -132,7 +132,15 @@ MFUNC_PROTO(fput) {
   return TRUE_ATOM;
 }
 
+MFUNC_PROTO(feof) {
+  check_argc("feof", 1, args);
+  check_argt("feof", args, P_UTYPE, 0);
+  check_argu("feof", args, "file", NULL);
+
+  return feof((FILE *)args->value) ?
+    TRUE_ATOM : NIL_ATOM;
+}
+
 MFUNC_PROTO(io_error) {
   return make_atom(P_STR, "", (void *)errstr);
 }
-

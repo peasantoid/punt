@@ -18,30 +18,44 @@
 #include "common.h"
 
 int main(const int argc, const char **argv) {
-  static unsigned int i;
   static FILE *fp;
   static struct stat finfo;
-  p_atom *vars = NULL;
+  static p_atom *vars;
+    vars = NULL;
   register_builtins(&vars);
+  static int c;
+  static char *read;
+    read = "";
 
-  for(i = 1; i < argc; i++) {
-     if(stat(argv[i], &finfo) == -1) {
-       perror(argv[i]);
+  /* a file was specified */
+  if(argc >= 2) {
+     if(stat(argv[1], &finfo) == -1) {
+       perror(argv[1]);
        return 1;
      } else if (!S_ISREG(finfo.st_mode)) {
-       fprintf(stderr, "%s: Not a regular file.\n", argv[i]);
+       fprintf(stderr, "%s: Not a regular file.\n", argv[1]);
        return 1;
      }
 
-    fp = fopen(argv[i], "r");
+    fp = fopen(argv[1], "r");
     if(!fp) {
-      perror(argv[i]);
+      perror(argv[1]);
       return 1;
     }
 
     run_code(parse_tokens(tokenize_fp(fp)), &vars);
     fclose(fp);
+  /* reading from stdin */
+  } else {
+    while(1) {
+      c = fgetc(stdin);
+      if(c == EOF) {
+        break;
+      }
+      asprintf(&read, "%s%c", read, c);
+    }
   }
+  run_code(parse_tokens(tokenize_str(read)), &vars);
 
   return 0;
 }

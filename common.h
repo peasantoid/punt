@@ -85,7 +85,7 @@ int atom_true(p_atom *);
 void *make_utype(const char *, void *);
 #define NIL_ATOM make_atom(P_NIL, "", NULL)
 #define TRUE_ATOM make_atom(P_NUM, "", atom_dupnum(1))
-#define ATOM_NEXT(a) ((a) = (p_atom *)(a)->next)
+#define ATOM_NEXT(a) ((a) = (p_atom *)((a)->next))
 #define UTYPE(a) ((p_utype *)((a)->value))
 
 /* tokenizer.c */

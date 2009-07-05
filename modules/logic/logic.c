@@ -18,14 +18,13 @@
 #include "../../common.h"
 
 REPORT_MODULE("not",
+              "true",
+
               "and",
               "or",
 
               "yes",
-              "no",
-              
-              "true",
-              "false");
+              "no");             
 
 MFUNC_PROTO(not) {
   check_argc("not", 1, args);

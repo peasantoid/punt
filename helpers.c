@@ -125,7 +125,8 @@ void check_argu(const char *func, p_atom *args, ...) {
 
     if(args->type != P_UTYPE || strcmp(UTYPE(args)->type, type)) {
       func_err(func, vafmt("incorrect type '%s' for argument %ld (should be '%s')",
-            UTYPE(args)->type, i + 1, type));
+            (args->type != P_UTYPE) ? prim_type_name(args->type) : UTYPE(args)->type,
+            i + 1, type));
     }
 
     ATOM_NEXT(args);

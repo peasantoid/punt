@@ -46,7 +46,7 @@ p_atom *tokenize_str(const char *str) {
   for(i = 0; i < strlen(str); i++) {
     switch(str[i]) {
       case '#':
-        for(; str[i] != '\n' && i < strlen(str); i++);
+        for(; i < strlen(str) && str[i] != '\n'; i++);
         break;
       case '[':
         for(i++, level = 1; i < strlen(str); i++) {

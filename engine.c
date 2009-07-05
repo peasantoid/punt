@@ -99,6 +99,8 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
          *funcvars, *orig;
   p_atom *(*funcptr)(p_atom *, p_atom **) = NULL;
   int i;
+
+  if(!exp) { return NIL_ATOM; }
   
   /* it evaluates to a symbol */
   if(exp->type == PT_LITSYM) {

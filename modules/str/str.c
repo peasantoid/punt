@@ -34,8 +34,8 @@ MFUNC_PROTO(sfmt) {
       asprintf((char **)&rval->value, "%s%s", (char *)rval->value, (char *)args->value);
     } else if(args->type == P_NUM) {
       num = *(p_num *)args->value;
-      if((int)num == num) {
-        asprintf((char **)&rval->value, "%s%d", (char *)rval->value, (int)num);
+      if((long)num == num) {
+        asprintf((char **)&rval->value, "%s%ld", (char *)rval->value, (long)num);
       } else {
         asprintf((char **)&rval->value, "%s%f", (char *)rval->value, num);
       }
