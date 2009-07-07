@@ -65,7 +65,7 @@ MFUNC_PROTO(cond) {
   return NIL_ATOM;
 }
 
-/* returns value of last argument */
+/* return value of last argument */
 MFUNC_PROTO(last) {
   return atom_tail(args);
 }

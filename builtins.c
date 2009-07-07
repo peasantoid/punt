@@ -19,12 +19,13 @@
 
 /* load module */
 p_atom *blt_use(p_atom *args, p_atom **vars) {
-  char *path;
+  static char *path;
+  static size_t i;
+    i = 1;
 
   while(args) {
     if(args->type != P_STR) {
-      fprintf(stderr, "use: all arguments must be strings\n");
-      exit(1);
+      func_err("use", vafmt("non-string argument %ld", i));
     }
 
     asprintf(&path, "%s/%s.so", MOD_DIR, basename((char *)args->value));
@@ -33,7 +34,9 @@ p_atom *blt_use(p_atom *args, p_atom **vars) {
       exit(1);
     }
 
-    args = (p_atom *)args->next;
+    free(path);
+    ATOM_NEXT(args);
+    i++;
   }
 
   return NIL_ATOM;

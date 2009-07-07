@@ -1,7 +1,7 @@
 #!/bin/bash
 
-BIN_DIR="/usr/local/bin"
-MOD_DIR="/usr/local/lib/punt"
+BIN_DIR='/usr/local/bin'
+MOD_DIR='/usr/local/lib/punt'
 
 make_punt() {
   echo 'Building interpreter...'

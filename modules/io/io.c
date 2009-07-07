@@ -22,10 +22,12 @@ REPORT_MODULE("stdout",
               "stdin",
               "fopen",
               "fclose",
-              "fget",
+              "fgets",
               "fput",
               "feof",
-              "io_error");
+              "io_error",
+              "fgetc",
+              "fgetl");
 
 char *errstr;
 
@@ -79,16 +81,15 @@ MFUNC_PROTO(fclose) {
   return TRUE_ATOM;
 }
 
-MFUNC_PROTO(fget) {
-  check_argc("fget", 2, args);
-  check_argt("fget", args, P_UTYPE, P_NUM, 0);
-  check_argu("fget", args, "file", "", NULL);
+MFUNC_PROTO(fgets) {
+  check_argc("fgets", 2, args);
+  check_argt("fgets", args, P_UTYPE, P_NUM, 0);
+  check_argu("fgets", args, "file", "", NULL);
 
   static char *read, *data;
-    read = NULL;
     data = "";
-  static long readlen;
-    readlen = (long)*(p_num *)atom_getindex(args, 1)->value;
+  static size_t readlen;
+    readlen = (size_t)*(p_num *)atom_getindex(args, 1)->value;
   const int blocksize = 4096;
   FILE *fp = (FILE *)UTYPE(args)->value;
 
@@ -121,7 +122,8 @@ MFUNC_PROTO(fput) {
   check_argt("fput", args, P_UTYPE, P_STR, 0);
   check_argu("fput", args, "file", "", NULL);
 
-  FILE *fp = (FILE *)UTYPE(args)->value;
+  static FILE *fp;
+    fp = (FILE *)UTYPE(args)->value;
   
   if(fputs((char *)atom_getindex(args, 1)->value, fp) == EOF ||
       fflush(fp) == EOF) {
@@ -143,4 +145,52 @@ MFUNC_PROTO(feof) {
 
 MFUNC_PROTO(io_error) {
   return make_atom(P_STR, "", (void *)errstr);
+}
+
+MFUNC_PROTO(fgetc) {
+  check_argc("fgetc", 1, args);
+  check_argt("fgetc", args, P_UTYPE, 0);
+  check_argu("fgetc", args, "file", NULL);
+
+  static FILE *fp;
+    fp = (FILE *)UTYPE(args)->value;
+  static int c;
+    c = fgetc(fp);
+
+  if(c == EOF) {
+    if(feof(fp)) {
+      return make_atom(P_STR, "", (void *)"");
+    } else {
+      seterr(errno);
+      return NIL_ATOM;
+    }
+  }
+
+  return make_atom(P_STR, "", vafmt("%c", c));
+}
+
+MFUNC_PROTO(fgetl) {
+  check_argc("fgetl", 1, args);
+  check_argt("fgetl", args, P_UTYPE, 0);
+  check_argu("fgetl", args, "file", NULL);
+
+  static char *read;
+    read = "";
+  static int c;
+  static FILE *fp;
+    fp = (FILE *)UTYPE(args)->value;
+
+  while((c = fgetc(fp)) != EOF) {
+    asprintf(&read, "%s%c", read, c);
+    if(c == '\n') {
+      break;
+    }
+  }
+  /* got error */
+  if(ferror(fp)) {
+    seterr(errno);
+    return NIL_ATOM;
+  }
+
+  return make_atom(P_STR, "", read);
 }

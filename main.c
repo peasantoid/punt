@@ -23,9 +23,10 @@ int main(const int argc, const char **argv) {
   static p_atom *vars;
     vars = NULL;
   register_builtins(&vars);
-  static int c;
-  static char *read;
-    read = "";
+  static char *read, *str;
+    str = "";
+  static int blocksize;
+    blocksize = 4096;
 
   /* a file was specified */
   if(argc >= 2) {
@@ -48,14 +49,15 @@ int main(const int argc, const char **argv) {
   /* reading from stdin */
   } else {
     while(1) {
-      c = fgetc(stdin);
-      if(c == EOF) {
+      read = (char *)calloc(blocksize + 1, sizeof(char));
+      if(!fgets(read, blocksize, stdin)) {
         break;
       }
-      asprintf(&read, "%s%c", read, c);
+      asprintf(&str, "%s%s", str, read);
+      free(read);
     }
+    run_code(parse_tokens(tokenize_str(str)), &vars);
   }
-  run_code(parse_tokens(tokenize_str(read)), &vars);
 
   return 0;
 }

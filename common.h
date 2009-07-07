@@ -49,6 +49,12 @@ typedef enum {
   PT_EXP
 } p_type;
 
+/* non-primitive type */
+typedef struct {
+  char *type;
+  void *value;
+} p_utype;
+
 /* serves as just about everything */
 typedef struct {
   p_type type;
@@ -58,12 +64,6 @@ typedef struct {
 
   struct p_atom *next;
 } p_atom;
-
-/* non-primitive type */
-typedef struct {
-  char *type;
-  void *value;
-} p_utype;
 
 typedef double p_num;
 

@@ -176,7 +176,7 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
     funcptr = func->value;
     rval = (*funcptr)(args, vars);
   } else {
-    fprintf(stderr, "type not callable\n");
+    fprintf(stderr, "type '%s' not callable\n", prim_type_name(func->type));
     exit(1);
   }
 

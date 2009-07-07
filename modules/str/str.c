@@ -39,10 +39,10 @@ MFUNC_PROTO(sfmt) {
       } else {
         asprintf((char **)&rval->value, "%s%f", (char *)rval->value, num);
       }
-    } else if(args->type == P_NIL) {
-      asprintf((char **)&rval->value, "%s(nil)", (char *)rval->value);
+    } else if(args->type == P_UTYPE) {
+      asprintf((char **)&rval->value, "%s(%s)", (char *)rval->value, UTYPE(args)->type);
     } else {
-      asprintf((char **)&rval->value, "%s(unknown)", (char *)rval->value);
+      asprintf((char **)&rval->value, "%s(%s)", (char *)rval->value, prim_type_name(args->type));
     }
     ATOM_NEXT(args);
   }
