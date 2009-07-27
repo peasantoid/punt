@@ -25,7 +25,8 @@
 REPORT_MODULE("list",
               "llen",
               "lpos",
-              "lkey");
+              "lkey",
+              "lcat");
 
 MFUNC_PROTO(list) {
   static p_atom **rval;
@@ -53,8 +54,8 @@ MFUNC_PROTO(lpos) {
     list = *(p_atom **)args->value;
   static size_t listlen;
     listlen = atom_len(list);
-  static long pos;
-    pos = *(p_num *)atom_getindex(args, 1)->value;
+  static size_t pos;
+    pos = (size_t)*(p_num *)atom_getindex(args, 1)->value;
 
   if(pos < 0 || pos >= listlen) {
     func_err("lpos",
@@ -77,4 +78,34 @@ MFUNC_PROTO(lkey) {
     func_err("lkey", vafmt("key '%s' not in list", key));
   }
   return make_atom(rval->type, "", rval->value);
+}
+
+MFUNC_PROTO(lcat) {
+  static p_atom *_args;
+    _args = args;
+  while(_args) {
+    if(_args->type != P_LIST) {
+      func_err("lcat", "can't concatenate non-list -> list");
+    }
+    ATOM_NEXT(_args);
+  }
+
+  static p_atom **dest_list, *src_list;
+    dest_list = (p_atom **)calloc(1, sizeof(p_atom *));
+    *dest_list = NULL;
+    
+  _args = args;
+  while(_args) {
+    src_list = *(p_atom **)_args->value;
+    while(src_list) {
+      /* preserve name? */
+      atom_append(dest_list, make_atom(src_list->type,
+            src_list->name,
+            src_list->value));
+      ATOM_NEXT(src_list);
+    }
+    ATOM_NEXT(_args);
+  }
+
+  return make_atom(P_LIST, "", (void *)dest_list);
 }

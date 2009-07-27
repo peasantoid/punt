@@ -43,7 +43,7 @@ unsigned int atom_len(p_atom *atom) {
   return i;
 }
 
-/* return tail end of a linked list of atoms */
+/* return tail end of a list of atoms */
 p_atom *atom_tail(p_atom *atom) {
   if(!atom) { return NIL_ATOM; }
   while(atom->next) {
@@ -56,7 +56,7 @@ p_atom *atom_tail(p_atom *atom) {
   return atom;
 }
 
-/* append an atom to a linked list */
+/* append an atom [list] to another atom [list] */
 void atom_append(p_atom **target, p_atom *new) {
   if(!*target) {
     *target = new;
