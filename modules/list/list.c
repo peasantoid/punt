@@ -146,12 +146,7 @@ MFUNC_PROTO(lsetkey) {
     target = atom_getname(*list, key);
     new = atom_getindex(args, 2);
 
-  if(target) {
-    target->type = new->type;
-    target->value = new->value;
-  } else {
-    atom_append(list, make_atom(new->type, key, new->value));
-  }
+  atom_setname(list, make_atom(new->type, key, new->value));
 
   return NIL_ATOM;
 }
