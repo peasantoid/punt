@@ -26,7 +26,9 @@ REPORT_MODULE("list",
               "llen",
               "lpos",
               "lkey",
-              "lcat");
+              "lcat",
+              "lsetpos",
+              "lsetkey");
 
 MFUNC_PROTO(list) {
   static p_atom **rval;
@@ -34,16 +36,16 @@ MFUNC_PROTO(list) {
     *rval = NULL;
 
   while(args) {
-    atom_append(rval, make_atom(args->type, "", args->value));
+    atom_append(rval, make_atom(args->type, NULL, args->value));
     ATOM_NEXT(args);
   }
-  return make_atom(P_LIST, "", (void *)rval);
+  return make_atom(P_LIST, NULL, (void *)rval);
 }
 
 MFUNC_PROTO(llen) {
   check_argc("llen", 1, args);
   check_argt("llen", args, P_LIST, 0);
-  return make_atom(P_NUM, "", atom_dupnum(atom_len(*(p_atom **)args->value)));
+  return make_atom(P_NUM, NULL, atom_dupnum(atom_len(*(p_atom **)args->value)));
 }
 
 MFUNC_PROTO(lpos) {
@@ -62,7 +64,7 @@ MFUNC_PROTO(lpos) {
         vafmt("index %ld out of range in list with length of %ld", pos, listlen));
   }
   rval = atom_getindex(list, pos);
-  return make_atom(rval->type, "", rval->value);
+  return make_atom(rval->type, NULL, rval->value);
 }
 
 MFUNC_PROTO(lkey) {
@@ -77,7 +79,7 @@ MFUNC_PROTO(lkey) {
   if(!rval) {
     func_err("lkey", vafmt("key '%s' not in list", key));
   }
-  return make_atom(rval->type, "", rval->value);
+  return make_atom(rval->type, NULL, rval->value);
 }
 
 MFUNC_PROTO(lcat) {
@@ -85,7 +87,7 @@ MFUNC_PROTO(lcat) {
     _args = args;
   while(_args) {
     if(_args->type != P_LIST) {
-      func_err("lcat", "can't concatenate non-list -> list");
+      func_err("lcat", "can't concatenate non-list to list");
     }
     ATOM_NEXT(_args);
   }
@@ -107,5 +109,49 @@ MFUNC_PROTO(lcat) {
     ATOM_NEXT(_args);
   }
 
-  return make_atom(P_LIST, "", (void *)dest_list);
+  return make_atom(P_LIST, NULL, (void *)dest_list);
+}
+
+MFUNC_PROTO(lsetpos) {
+  check_argc("lsetpos", 3, args);
+  check_argt("lsetpos", args, P_LIST, P_NUM, P_ANY, 0);
+
+  static p_atom *list, *target, *new;
+    list = *(p_atom **)args->value;
+    new = atom_getindex(args, 2);
+  static size_t pos, len;
+    pos = (size_t)*(p_num *)atom_getindex(args, 1)->value;
+    len = atom_len(list);
+
+  if(pos < 0 || pos >= len) {
+    func_err("lsetpos",
+        vafmt("index %ld out of range in list with length of %ld", pos, len));
+  }
+  target = atom_getindex(list, pos);
+  target->type = new->type;
+  target->name = NULL; /* preserve name? */
+  target->value = new->value;
+
+  return NIL_ATOM;
+}
+
+MFUNC_PROTO(lsetkey) {
+  check_argc("lsetkey", 3, args);
+  check_argt("lsetkey", args, P_LIST, P_STR, P_ANY, 0);
+
+  static char *key;
+    key = (char *)atom_getindex(args, 1)->value;
+  static p_atom **list, *target, *new;
+    list = (p_atom **)args->value;
+    target = atom_getname(*list, key);
+    new = atom_getindex(args, 2);
+
+  if(target) {
+    target->type = new->type;
+    target->value = new->value;
+  } else {
+    atom_append(list, make_atom(new->type, key, new->value));
+  }
+
+  return NIL_ATOM;
 }

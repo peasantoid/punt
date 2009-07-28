@@ -41,15 +41,15 @@ void seterr(const int err) {
 }
 
 MFUNC_PROTO(stdout) {
-  return make_atom(P_UTYPE, "", make_utype("file", (void *)stdout));
+  return make_atom(P_UTYPE, NULL, make_utype("file", (void *)stdout));
 }
 
 MFUNC_PROTO(stderr) {
-  return make_atom(P_UTYPE, "", make_utype("file", (void *)stderr));
+  return make_atom(P_UTYPE, NULL, make_utype("file", (void *)stderr));
 }
 
 MFUNC_PROTO(stdin) {
-  return make_atom(P_UTYPE, "", make_utype("file", (void *)stdin));
+  return make_atom(P_UTYPE, NULL, make_utype("file", (void *)stdin));
 }
 
 MFUNC_PROTO(fopen) {
@@ -65,7 +65,7 @@ MFUNC_PROTO(fopen) {
     return NIL_ATOM;
   }
 
-  return make_atom(P_UTYPE, "", make_utype("file", (void *)fp));
+  return make_atom(P_UTYPE, NULL, make_utype("file", (void *)fp));
 }
 
 MFUNC_PROTO(fclose) {
@@ -114,7 +114,7 @@ MFUNC_PROTO(fgets) {
     }
   }
 
-  return make_atom(P_STR, "", (void *)data);
+  return make_atom(P_STR, NULL, (void *)data);
 }
 
 MFUNC_PROTO(fput) {
@@ -144,7 +144,7 @@ MFUNC_PROTO(feof) {
 }
 
 MFUNC_PROTO(io_error) {
-  return make_atom(P_STR, "", (void *)errstr);
+  return make_atom(P_STR, NULL, (void *)errstr);
 }
 
 MFUNC_PROTO(fgetc) {
@@ -159,14 +159,14 @@ MFUNC_PROTO(fgetc) {
 
   if(c == EOF) {
     if(feof(fp)) {
-      return make_atom(P_STR, "", (void *)"");
+      return make_atom(P_STR, NULL, (void *)"");
     } else {
       seterr(errno);
       return NIL_ATOM;
     }
   }
 
-  return make_atom(P_STR, "", vafmt("%c", c));
+  return make_atom(P_STR, NULL, vafmt("%c", c));
 }
 
 MFUNC_PROTO(fgetl) {
@@ -192,5 +192,5 @@ MFUNC_PROTO(fgetl) {
     return NIL_ATOM;
   }
 
-  return make_atom(P_STR, "", read);
+  return make_atom(P_STR, NULL, read);
 }

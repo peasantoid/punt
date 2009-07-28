@@ -41,6 +41,7 @@ typedef enum {
   P_MFUNC,
   P_FUNC,
   P_UTYPE,
+  P_ANY,
 
   PT_PARENL,
   PT_PARENR,
@@ -83,8 +84,8 @@ p_atom *atom_dup(p_atom *);
 void atom_setname(p_atom **, p_atom *);
 int atom_true(p_atom *);
 void *make_utype(const char *, void *);
-#define NIL_ATOM make_atom(P_NIL, "", NULL)
-#define TRUE_ATOM make_atom(P_NUM, "", atom_dupnum(1))
+#define NIL_ATOM make_atom(P_NIL, NULL, NULL)
+#define TRUE_ATOM make_atom(P_NUM, NULL, atom_dupnum(1))
 #define ATOM_NEXT(a) ((a) = (p_atom *)((a)->next))
 #define UTYPE(a) ((p_utype *)((a)->value))
 

@@ -34,7 +34,7 @@ MFUNC_REPORT {
 MFUNC_PROTO(func) {
   check_argc("func", 1, args);
 
-  p_atom *rval = make_atom(P_FUNC, "", NULL);
+  p_atom *rval = make_atom(P_FUNC, NULL, NULL);
 
   if(args->type != P_BLOCK) {
     fprintf(stderr, "func: body must be quoted exp\n");
@@ -80,7 +80,7 @@ MFUNC_PROTO(if) {
   }
 
   if(atom_true(cond)) {
-    return run_exp(make_atom(PT_EXP, "", code->value), vars);
+    return run_exp(make_atom(PT_EXP, NULL, code->value), vars);
   }
 
   return NIL_ATOM;
@@ -111,8 +111,8 @@ MFUNC_PROTO(while) {
 
   p_atom *rval = NIL_ATOM;
 
-  while(atom_true(run_exp(make_atom(PT_EXP, "", args->value), vars))) {
-    rval = run_exp(make_atom(PT_EXP, "", atom_getindex(args, 1)->value), vars);
+  while(atom_true(run_exp(make_atom(PT_EXP, NULL, args->value), vars))) {
+    rval = run_exp(make_atom(PT_EXP, NULL, atom_getindex(args, 1)->value), vars);
   }
 
   return rval;

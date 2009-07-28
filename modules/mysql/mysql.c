@@ -56,7 +56,7 @@ MFUNC_PROTO(mysql_connect) {
     return NIL_ATOM;
   }
 
-  return make_atom(P_UTYPE, "", make_utype("mysql", (void *)rval));
+  return make_atom(P_UTYPE, NULL, make_utype("mysql", (void *)rval));
 }
 
 MFUNC_PROTO(mysql_query) {
@@ -74,12 +74,12 @@ MFUNC_PROTO(mysql_query) {
 
   MYSQL_RES *res = mysql_use_result(conn);
 
-  return make_atom(P_UTYPE, "", make_utype("mysql_res", (void *)res));
+  return make_atom(P_UTYPE, NULL, make_utype("mysql_res", (void *)res));
 }
 
 MFUNC_PROTO(mysql_error) {
   check_argc("mysql_error", 0, args);
-  return make_atom(P_STR, "", (void *)errstr);
+  return make_atom(P_STR, NULL, (void *)errstr);
 }
 
 MFUNC_PROTO(mysql_fetch_row) {
@@ -90,7 +90,7 @@ MFUNC_PROTO(mysql_fetch_row) {
   if(!row) {
     return NIL_ATOM;
   }
-  return make_atom(P_UTYPE, "", make_utype("mysql_row", (void *)row));
+  return make_atom(P_UTYPE, NULL, make_utype("mysql_row", (void *)row));
 }
 
 MFUNC_PROTO(mysql_field) {
@@ -100,7 +100,7 @@ MFUNC_PROTO(mysql_field) {
 
   char *field = ((MYSQL_ROW)UTYPE(args)->value)
         [(int)*(p_num *)atom_getindex(args, 1)->value];
-  return make_atom(P_STR, "", (void *)field);
+  return make_atom(P_STR, NULL, (void *)field);
 }
 
 MFUNC_PROTO(mysql_escape) {
@@ -117,7 +117,7 @@ MFUNC_PROTO(mysql_escape) {
   char *to = (char *)calloc((len * 2) + 1, sizeof(char));
   mysql_real_escape_string((MYSQL *)UTYPE(args)->value, to, from, len);
 
-  return make_atom(P_STR, "", (void *)to);
+  return make_atom(P_STR, NULL, (void *)to);
 }
 
 MFUNC_PROTO(mysql_free_result) {

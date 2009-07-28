@@ -21,7 +21,7 @@
 p_atom *make_atom(p_type type, const char *name, void *value) {
   p_atom *atom = (p_atom *)calloc(1, sizeof(p_atom));
     atom->type = type;
-    atom->name = strdup(name);
+    atom->name = name ? strdup(name) : NULL;
     atom->value = value;
     atom->next = NULL;
   return atom;
@@ -69,7 +69,9 @@ void atom_append(p_atom **target, p_atom *new) {
 p_atom *atom_getindex(p_atom *atom, unsigned int index) {
   static unsigned int i;
   i = 0;
-  for(i = 0; i < index; i++) {
+  for(i = 0;
+      i < index;
+      i++) {
     ATOM_NEXT(atom);
   }
   return atom;
@@ -77,12 +79,14 @@ p_atom *atom_getindex(p_atom *atom, unsigned int index) {
 
 /* get an atom by name */
 p_atom *atom_getname(p_atom *atom, const char *name) {
-  if(!strlen(name)) { return NULL; }
+  if(!name) {
+    return NULL;
+  }
   while(atom) {
-    if(!strcmp(atom->name, name)) {
+    if(atom->name && !strcmp(atom->name, name)) {
       return atom;
     }
-    atom = (p_atom *)atom->next;
+    ATOM_NEXT(atom);
   }
   return NULL;
 }
@@ -95,6 +99,20 @@ p_atom *atom_dup(p_atom *atom) {
     atom = (p_atom *)atom->next;
   }
   return list;
+}
+
+void atom_setindex(p_atom *list, size_t pos, p_atom *new) {
+  static size_t len, i;
+    len = atom_len(list);
+  for(i = 0;
+      list != NULL;
+      i++, ATOM_NEXT(list)) {
+    if(i == pos) {
+      list->type = new->type;
+      list->name = NULL; /* preserve name? */
+      list->value = new->value;
+    }
+  }
 }
 
 /* set atom by name */

@@ -88,9 +88,11 @@ void check_argt(const char *func, p_atom *args, ...) {
   va_start(ap, args);
   while(1) {
     type = va_arg(ap, p_type);
-    if(type == 0) { break; }
+    if(type == 0) {
+      break;
+    }
     
-    if(args->type != type) {
+    if(args->type != type && type != P_ANY) {
       func_err(func, vafmt("incorrect type '%s' for argument %ld (should be '%s')", 
             prim_type_name(args->type), i + 1, prim_type_name(type)));
     }
@@ -119,6 +121,7 @@ void check_argu(const char *func, p_atom *args, ...) {
     /*
      * order of these two is very important, as strlen() segfaults
      * if NULL
+     *
      */
     if(!type) { break; }
     else if(strlen(type) == 0) { continue; }
@@ -165,7 +168,7 @@ char *prim_type_name(p_type type) {
       return "custom";
       break;
     default:
-      return "(undefined)";
+      return "undefined_type";
       break;
   }
 }

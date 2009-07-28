@@ -24,11 +24,11 @@ p_atom *parse_tokens(p_atom *tokens) {
 
   while(tokens) {
     if(tokens->type == P_NUM) {
-      atom_append(&code, make_atom(P_NUM, "", atom_dupnum(*(p_num *)tokens->value)));
+      atom_append(&code, make_atom(P_NUM, NULL, atom_dupnum(*(p_num *)tokens->value)));
     } else if(tokens->type == P_STR) {
-      atom_append(&code, make_atom(P_STR, "", (void *)strdup((char *)tokens->value)));
+      atom_append(&code, make_atom(P_STR, NULL, (void *)strdup((char *)tokens->value)));
     } else if(tokens->type == P_SYM) {
-      atom_append(&code, make_atom(P_SYM, "", tokens->value));
+      atom_append(&code, make_atom(P_SYM, NULL, tokens->value));
     /* it's an expression */
     } else if(tokens->type == PT_PARENL) {
       tokens = (p_atom *)tokens->next;
@@ -41,10 +41,10 @@ p_atom *parse_tokens(p_atom *tokens) {
         else if(tokens->type == PT_PARENR) { level--; }
         if(level <= 0) { break; }
 
-        atom_append(&list, make_atom(tokens->type, "", tokens->value));
+        atom_append(&list, make_atom(tokens->type, NULL, tokens->value));
         tokens = (p_atom *)tokens->next;
       }
-      atom_append(&code, make_atom(PT_EXP, "", parse_tokens(list)));
+      atom_append(&code, make_atom(PT_EXP, NULL, parse_tokens(list)));
     /* it's a literal something-or-other */
     } else if(tokens->type == PT_QUOTE) {
       tokens = (p_atom *)tokens->next;
@@ -62,14 +62,14 @@ p_atom *parse_tokens(p_atom *tokens) {
           else if(tokens->type == PT_PARENR) { level--; }
           if(level <= 0) { break; }
 
-          atom_append(&list, make_atom(tokens->type, "", tokens->value));
+          atom_append(&list, make_atom(tokens->type, NULL, tokens->value));
           tokens = (p_atom *)tokens->next;
         }
-        atom_append(&code, make_atom(P_BLOCK, "", parse_tokens(list)));
+        atom_append(&code, make_atom(P_BLOCK, NULL, parse_tokens(list)));
 
       /* it's a quoted symbol: .something */
       } else if(tokens->type == P_SYM) {
-        atom_append(&code, make_atom(PT_LITSYM, "", tokens->value));
+        atom_append(&code, make_atom(PT_LITSYM, NULL, tokens->value));
       }
     }
     if(tokens) { tokens = (p_atom *)tokens->next; }
@@ -104,7 +104,7 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
   
   /* it evaluates to a symbol */
   if(exp->type == PT_LITSYM) {
-    return make_atom(P_SYM, "", exp->value);
+    return make_atom(P_SYM, NULL, exp->value);
   /* we can resolve it */
   } else if(exp->type == P_SYM) {
     return resolve_symbol(*vars, (char *)exp->value);
@@ -119,11 +119,11 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
       atom_append(&args, atom = run_exp(_args, vars));
     } else if(_args->type == P_SYM) {
       atom = resolve_symbol(*vars, (char *)_args->value);
-      atom_append(&args, make_atom(atom->type, "", atom->value));
+      atom_append(&args, make_atom(atom->type, NULL, atom->value));
     } else if(_args->type == PT_LITSYM) {
-      atom_append(&args, make_atom(P_SYM, "", _args->value));
+      atom_append(&args, make_atom(P_SYM, NULL, _args->value));
     } else {
-      atom_append(&args, make_atom(_args->type, "", _args->value));
+      atom_append(&args, make_atom(_args->type, NULL, _args->value));
     }
     _args = (p_atom *)_args->next;
   }
@@ -171,7 +171,7 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
      * convert the func to an exp so the engine will know to run it
      * rather than return its value
      */
-    rval = run_exp(make_atom(PT_EXP, "", func->value), &funcvars);
+    rval = run_exp(make_atom(PT_EXP, NULL, func->value), &funcvars);
   } else if(func->type == P_MFUNC) {
     funcptr = func->value;
     rval = (*funcptr)(args, vars);

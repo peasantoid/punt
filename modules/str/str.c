@@ -26,7 +26,7 @@ REPORT_MODULE("sfmt",
               "slen");
 
 MFUNC_PROTO(sfmt) {
-  p_atom *rval = make_atom(P_STR, "", (void *)"");
+  p_atom *rval = make_atom(P_STR, NULL, (void *)"");
   p_num num;
 
   while(args) {
@@ -62,7 +62,7 @@ MFUNC_PROTO(sfind) {
     ATOM_NEXT(args);
   } args = orig;
 
-  return make_atom(P_NUM, "", atom_dupnum(str_pos(
+  return make_atom(P_NUM, NULL, atom_dupnum(str_pos(
           (char *)args->value, (char *)atom_getindex(args, 1)->value, 0)));
 }
 
@@ -78,7 +78,7 @@ MFUNC_PROTO(srepl) {
     ATOM_NEXT(args);
   } args = orig;
 
-  return make_atom(P_STR, "", str_replace(
+  return make_atom(P_STR, NULL, str_replace(
           (char *)args->value, (char *)atom_getindex(args, 1)->value,
           (char *)atom_getindex(args, 2)->value, 0));
 }
@@ -87,14 +87,14 @@ MFUNC_PROTO(ord) {
   check_argc("ord", 1, args);
   check_argt("ord", args, P_STR, 0);
 
-  return make_atom(P_NUM, "", atom_dupnum(*(char *)args->value));
+  return make_atom(P_NUM, NULL, atom_dupnum(*(char *)args->value));
 }
 
 MFUNC_PROTO(chr) {
   check_argc("chr", 1, args);
   check_argt("chr", args, P_NUM, 0);
 
-  return make_atom(P_STR, "", vafmt("%c", (char)*(p_num *)args->value));
+  return make_atom(P_STR, NULL, vafmt("%c", (char)*(p_num *)args->value));
 }
 
 MFUNC_PROTO(ssub) {
@@ -113,13 +113,13 @@ MFUNC_PROTO(ssub) {
     rval[count] = str[i];
   }
 
-  return make_atom(P_STR, "", (void *)rval);
+  return make_atom(P_STR, NULL, (void *)rval);
 }
 
 MFUNC_PROTO(slen) {
   check_argc("slen", 1, args);
   check_argt("slen", args, P_STR, 0);
 
-  return make_atom(P_NUM, "", atom_dupnum(strlen((char *)args->value)));
+  return make_atom(P_NUM, NULL, atom_dupnum(strlen((char *)args->value)));
 }
 

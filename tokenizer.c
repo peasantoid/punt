@@ -56,13 +56,13 @@ p_atom *tokenize_str(const char *str) {
         }
         break;
       case '(':
-        atom_append(&tokens, make_atom(PT_PARENL, "", NULL));
+        atom_append(&tokens, make_atom(PT_PARENL, NULL, NULL));
         break;
       case ')':
-        atom_append(&tokens, make_atom(PT_PARENR, "", NULL));
+        atom_append(&tokens, make_atom(PT_PARENR, NULL, NULL));
         break;
       case '.':
-        atom_append(&tokens, make_atom(PT_QUOTE, "", NULL));
+        atom_append(&tokens, make_atom(PT_QUOTE, NULL, NULL));
         break;
       case '\'':
         /* FIXME: string parsing code is ugly and inefficient */
@@ -95,7 +95,7 @@ p_atom *tokenize_str(const char *str) {
         strv = str_replace(strv, "\\'", "'", 0);
         strv = str_replace(strv, "\\\n", "\n", 0);
 
-        atom_append(&tokens, make_atom(P_STR, "", (void *)strdup(strv)));
+        atom_append(&tokens, make_atom(P_STR, NULL, (void *)strdup(strv)));
         free(strv);
         break;
       case '"':
@@ -103,7 +103,7 @@ p_atom *tokenize_str(const char *str) {
         for(i++; i < strlen(str) && str[i] != '"'; i++) {
           asprintf(&strv, "%s%c", strv, str[i]);
         }
-        atom_append(&tokens, make_atom(P_STR, "", (void *)strdup(strv)));
+        atom_append(&tokens, make_atom(P_STR, NULL, (void *)strdup(strv)));
         break;
       default:
         /* it seems to be a number */
@@ -116,7 +116,7 @@ p_atom *tokenize_str(const char *str) {
           }
           i--; /* might've overrun something important */
           
-          atom_append(&tokens, make_atom(P_NUM, "", atom_dupnum(strtod(strv, NULL))));
+          atom_append(&tokens, make_atom(P_NUM, NULL, atom_dupnum(strtod(strv, NULL))));
           free(strv);
         /* TODO: allow non-alphanumeric characters */
         } else if(IS_SYMBOL_CHAR(str[i])) {
@@ -128,7 +128,7 @@ p_atom *tokenize_str(const char *str) {
           }
           i--;
 
-          atom_append(&tokens, make_atom(P_SYM, "", (void *)strdup(strv)));
+          atom_append(&tokens, make_atom(P_SYM, NULL, (void *)strdup(strv)));
           free(strv);
         }
         break;

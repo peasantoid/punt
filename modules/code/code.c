@@ -24,7 +24,7 @@ MFUNC_PROTO(parse) {
   check_argc("parse", 1, args);
   check_argt("parse", args, P_STR, 0);
 
-  return make_atom(P_BLOCK, "", (void *)parse_tokens(
+  return make_atom(P_BLOCK, NULL, (void *)parse_tokens(
         tokenize_str((char *)args->value)));
 }
 
