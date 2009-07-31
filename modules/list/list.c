@@ -41,7 +41,7 @@ char *outofrange(const size_t pos, p_atom *list) {
 
 MFUNC_PROTO(list) {
   static p_atom **rval;
-    rval = (p_atom **)calloc(1, sizeof(p_atom *));
+    rval = ALLOC(1, p_atom *);
     *rval = NULL;
 
   while(args) {
@@ -99,7 +99,7 @@ MFUNC_PROTO(lcat) {
   }
 
   static p_atom **dest_list, *src_list;
-    dest_list = (p_atom **)calloc(1, sizeof(p_atom *));
+    dest_list = ALLOC(1, p_atom *);
     *dest_list = NULL;
     
   _args = args;
@@ -222,6 +222,34 @@ MFUNC_PROTO(ldelpos) {
 }
 
 MFUNC_PROTO(ldelkey) {
+  check_argc("ldelkey", 2, args);
+  check_argt("ldelkey", args, P_LIST, P_STR, 0);
+
+  static p_atom **listptr, *list, *prev;
+    listptr = (p_atom **)args->value;
+    list = *listptr;
+    prev = NULL;
+  static char *key;
+    key = (char *)atom_getindex(args, 1)->value;
+
+  if(!atom_getname(list, key)) {
+    func_err("ldelkey", vafmt("key '%s' not in list", key));
+  }
+
+  while(list) {
+    if(!strcmp(list->name, key)) {
+      if(prev) {
+        prev->next = list->next;
+      } else {
+        ATOM_NEXT(*listptr);
+      }
+      return NIL_ATOM;
+    }
+
+    prev = list;
+    ATOM_NEXT(list);
+  }
+
   return NIL_ATOM;
 }
 
