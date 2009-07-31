@@ -23,7 +23,8 @@ REPORT_MODULE("sfmt",
               "ord",
               "chr",
               "ssub",
-              "slen");
+              "slen",
+              "scmp");
 
 MFUNC_PROTO(sfmt) {
   p_atom *rval = make_atom(P_STR, NULL, (void *)"");
@@ -123,3 +124,38 @@ MFUNC_PROTO(slen) {
   return make_atom(P_NUM, NULL, atom_dupnum(strlen((char *)args->value)));
 }
 
+
+MFUNC_PROTO(scmp) {
+  #define RETNUM(n) return make_atom(P_NUM, NULL, atom_dupnum(n))
+
+  check_argc("scmp", 2, args);
+  check_argt("scmp", args, P_STR, P_STR, 0);
+
+  static char *str1, *str2;
+    str1 = (char *)args->value;
+    str2 = (char *)atom_getindex(args, 1)->value;
+  static size_t i, len1, len2;
+    len1 = strlen(str1);
+    len2 = strlen(str2);
+
+  if(strcmp(str1, str2)) {
+    for(i = 0;
+        i < len1 && i < len2;
+        ++i) {
+      if(str1[i] < str2[i]) {
+        RETNUM(1);
+      } else if(str1[i] > str2[i]) {
+        RETNUM(2);
+      }
+    }
+    if(len1 < len2) {
+      RETNUM(1);
+    } else if(len1 > len2) {
+      RETNUM(2);
+    }
+  }
+
+  RETNUM(0);
+
+  #undef RETNUM
+}
