@@ -28,7 +28,16 @@ REPORT_MODULE("list",
               "lkey",
               "lcat",
               "lsetpos",
-              "lsetkey");
+              "lsetkey",
+              "lappend",
+              "lwalk",
+              "lcopy",
+              "ldelpos",
+              "ldelkey");
+
+char *outofrange(const size_t pos, p_atom *list) {
+  return vafmt("index %ld out of range in list with length of %ld", pos, atom_len(list));
+}
 
 MFUNC_PROTO(list) {
   static p_atom **rval;
@@ -54,14 +63,11 @@ MFUNC_PROTO(lpos) {
 
   static p_atom *list, *rval;
     list = *(p_atom **)args->value;
-  static size_t listlen;
-    listlen = atom_len(list);
   static size_t pos;
     pos = (size_t)*(p_num *)atom_getindex(args, 1)->value;
 
-  if(pos < 0 || pos >= listlen) {
-    func_err("lpos",
-        vafmt("index %ld out of range in list with length of %ld", pos, listlen));
+  if(pos < 0 || pos >= atom_len(list)) {
+    func_err("lpos", outofrange(pos, list));
   }
   rval = atom_getindex(list, pos);
   return make_atom(rval->type, NULL, rval->value);
@@ -100,9 +106,8 @@ MFUNC_PROTO(lcat) {
   while(_args) {
     src_list = *(p_atom **)_args->value;
     while(src_list) {
-      /* preserve name? */
       atom_append(dest_list, make_atom(src_list->type,
-            src_list->name,
+            src_list->name, /* preserve name? */
             src_list->value));
       ATOM_NEXT(src_list);
     }
@@ -119,13 +124,11 @@ MFUNC_PROTO(lsetpos) {
   static p_atom *list, *target, *new;
     list = *(p_atom **)args->value;
     new = atom_getindex(args, 2);
-  static size_t pos, len;
+  static size_t pos;
     pos = (size_t)*(p_num *)atom_getindex(args, 1)->value;
-    len = atom_len(list);
 
-  if(pos < 0 || pos >= len) {
-    func_err("lsetpos",
-        vafmt("index %ld out of range in list with length of %ld", pos, len));
+  if(pos < 0 || pos >= atom_len(list)) {
+    func_err("lsetpos", outofrange(pos, list));
   }
   target = atom_getindex(list, pos);
   target->type = new->type;
@@ -141,12 +144,84 @@ MFUNC_PROTO(lsetkey) {
 
   static char *key;
     key = (char *)atom_getindex(args, 1)->value;
-  static p_atom **list, *target, *new;
+  static p_atom **list, *new;
     list = (p_atom **)args->value;
-    target = atom_getname(*list, key);
     new = atom_getindex(args, 2);
 
   atom_setname(list, make_atom(new->type, key, new->value));
 
   return NIL_ATOM;
 }
+
+MFUNC_PROTO(lappend) {
+  check_argc("lappend", -1, args);
+  check_argt("lappend", args, P_LIST, 0);
+
+  static p_atom **list;
+    list = (p_atom **)args->value;
+  for(ATOM_NEXT(args);
+      args;
+      ATOM_NEXT(args)) {
+    atom_append(list, make_atom(args->type, NULL, args->value));
+  }
+
+  return NIL_ATOM;
+}
+
+MFUNC_PROTO(lwalk) {
+  check_argc("lwalk", 3, args);
+  check_argt("lwalk", args, P_LIST, P_SYM, P_BLOCK, 0);
+
+  static p_atom *list, *exp, *rval;
+    list = *(p_atom **)args->value;
+    exp = make_atom(PT_EXP, NULL, atom_getindex(args, 2)->value);
+    rval = NIL_ATOM;
+  static char *name;
+    name = (char *)atom_getindex(args, 1)->value;
+
+  while(list) {
+    atom_setname(vars, make_atom(list->type, name, list->value));
+    rval = run_exp(exp, vars);
+    ATOM_NEXT(list);
+  }
+
+  return rval;
+}
+
+MFUNC_PROTO(lcopy) {
+  check_argc("lcopy", 1, args);
+  check_argt("lcopy", args, P_LIST, 0);
+
+  static p_atom **new;
+    new = ALLOC(1, p_atom *);
+    *new = atom_dup(*(p_atom **)args->value);
+
+  return make_atom(P_LIST, NULL, new);
+}
+
+MFUNC_PROTO(ldelpos) {
+  check_argc("ldelpos", 2, args);
+  check_argt("ldelpos", args, P_LIST, P_NUM, 0);
+
+  static p_atom **list;
+    list = (p_atom **)args->value;
+  static size_t pos;
+    pos = (size_t)*(p_num *)atom_getindex(args, 1)->value;
+
+  if(pos < 0 || pos >= atom_len(*list)) {
+    func_err("ldelpos", outofrange(pos, *list));
+  } else if(pos == 0) {
+    /* advance list */
+    ATOM_NEXT(*list);
+  } else {
+    /* bypass target element */
+    atom_getindex(*list, pos - 1)->next = atom_getindex(*list, pos)->next;
+  }
+
+  return NIL_ATOM;
+}
+
+MFUNC_PROTO(ldelkey) {
+  return NIL_ATOM;
+}
+

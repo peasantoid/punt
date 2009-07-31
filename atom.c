@@ -93,12 +93,16 @@ p_atom *atom_getname(p_atom *atom, const char *name) {
 
 /* duplicate atom list */
 p_atom *atom_dup(p_atom *atom) {
-  p_atom *list = NULL;
+  static p_atom **list;
+    list = (p_atom **)calloc(1, sizeof(p_atom *));
+    *list = NULL;
+
   while(atom) {
-    atom_append(&list, make_atom(atom->type, atom->name, atom->value));
+    atom_append(list, make_atom(atom->type, atom->name, atom->value));
     atom = (p_atom *)atom->next;
   }
-  return list;
+
+  return *list;
 }
 
 void atom_setindex(p_atom *list, size_t pos, p_atom *new) {

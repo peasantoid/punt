@@ -71,6 +71,7 @@ typedef double p_num;
 #define MODULE_INIT void _punt_init(void)
 #define MFUNC_REPORT char **_punt_report_funcs(void)
 #define MFUNC_PROTO(f) p_atom *punt_##f(p_atom *args, p_atom **vars)
+#define ALLOC(n, t) ((t *)calloc(n, sizeof(t)))
 
 /* atom.c */
 p_atom *make_atom(p_type, const char *, void *);

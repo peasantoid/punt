@@ -154,8 +154,8 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
     *vars = orig;
 
     /* set some special variables */
-    atom_setname(&funcvars, make_atom(P_FUNC, "__func", func->value));
-    atom_setname(&funcvars, make_atom(P_NUM, "__argc", atom_dupnum(atom_len(args))));
+    atom_setname(&funcvars, make_atom(P_FUNC, "_func", func->value));
+    atom_setname(&funcvars, make_atom(P_NUM, "_argc", atom_dupnum(atom_len(args))));
     
     /* arguments referring to variables */
     i = 1;
@@ -180,7 +180,7 @@ p_atom *run_exp(p_atom *exp, p_atom **vars) {
     exit(1);
   }
 
-  return rval;
+  return make_atom(rval->type, NULL, rval->value);
 }
 
 int load_module(const char *path, p_atom **vars) {
